@@ -61,6 +61,17 @@ class QnaRepository(private val dsl: DSLContext) {
             .execute()
     }
 
+    fun listAll(cursor: Long?, limit: Int): List<QnaRow> {
+        var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
+        if (cursor != null) condition = condition.and(QNAS.ID.lt(cursor))
+        return baseQuery().where(condition).orderBy(QNAS.ID.desc()).limit(limit).fetch().map { it.toRow() }
+    }
+
+    fun deleteAny(id: Long): Int {
+        dsl.deleteFrom(QNA_REPLIES).where(QNA_REPLIES.QNA_ID.eq(id)).execute()
+        return dsl.deleteFrom(QNAS).where(QNAS.ID.eq(id)).execute()
+    }
+
     fun deleteOpen(id: Long, memberId: Long): Int =
         dsl.deleteFrom(QNAS)
             .where(QNAS.ID.eq(id))

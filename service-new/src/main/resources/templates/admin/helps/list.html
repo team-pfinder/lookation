@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>도움말 목록 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">도움말 목록 <a class="btn btn-primary btn-sm" th:href="@{/admin/helps/new}">등록</a></h1>
+    <form method="get" th:action="@{/admin/helps}" class="mb-3 form-inline">
+        <label class="mr-2" for="category">카테고리</label>
+        <input class="form-control mr-2" id="category" name="category" th:value="${categoryFilter}">
+        <button class="btn btn-primary" type="submit">조회</button>
+    </form>
+    <div class="card shadow"><div class="card-body"><table class="table table-bordered">
+        <thead><tr><th>ID</th><th>카테고리</th><th>제목</th><th></th></tr></thead>
+        <tbody><tr th:each="h : ${page.items}">
+            <td th:text="${h.id}"></td><td th:text="${h.category}"></td><td><a th:href="@{/admin/helps/{id}(id=${h.id})}" th:text="${h.title}"></a></td>
+            <td><a class="btn btn-sm btn-primary" th:href="@{/admin/helps/{id}(id=${h.id})}">상세</a></td>
+        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="4" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
+        <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/helps(category=${categoryFilter}, cursor=${page.nextCursor})}">다음</a></div>
+    </div></div>
+</section></body></html>

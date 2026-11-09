@@ -38,6 +38,13 @@ class SanctionRepository(private val dsl: DSLContext) {
             .fetchOne()!!
             .value1()
 
+    fun listByAccount(accountId: Long): List<SanctionRow> =
+        dsl.selectFrom(SANCTIONS)
+            .where(SANCTIONS.ACCOUNT_ID.eq(accountId))
+            .orderBy(SANCTIONS.ID.desc())
+            .fetch()
+            .map { it.toRow() }
+
     fun findById(id: Long): SanctionRow? =
         dsl.selectFrom(SANCTIONS).where(SANCTIONS.ID.eq(id)).fetchOne()?.toRow()
 

@@ -45,7 +45,7 @@ cd service-new && ./gradlew bootRun
 
 ## HTML 화면 (Thymeleaf SSR)
 
-브라우저용 화면은 같은 앱의 HTML 체인에서 렌더한다. 인증은 `access_token`/`refresh_token` 쿠키(HttpOnly)로 하고, POST는 CSRF 토큰을 요구한다. API 체인(`/api/**`)은 계속 헤더 JWT 전용이다.
+브라우저용 화면은 같은 앱의 HTML 체인에서 렌더한다. 인증은 `access_token`/`refresh_token` 쿠키(HttpOnly)로 하고, POST는 CSRF 토큰을 요구한다. API 체인(`/api/**`)은 계속 헤더 JWT 전용이다. 관리자 콘솔(`/admin/**`)은 ADR 0011에 따라 전용 체인·전용 로그인(`admin_users`)으로 분리돼 있고, 이용자 `/login`으로는 들어갈 수 없다.
 
 | 메서드 | 경로 | 인증 | 템플릿 |
 |---|---|---|---|
@@ -65,8 +65,17 @@ cd service-new && ./gradlew bootRun
 | GET | `/mypage/reservations` | 필수 | `mypage/reservations.html` |
 | GET | `/mypage/reservations/{id}` | 필수 | `mypage/reservation.html` |
 | POST | `/mypage/reservations/{id}/cancel` | 필수 | 302 → 예약 상세 |
+| GET/POST | `/admin/login` | 공개 | `admin/login.html` |
+| POST | `/admin/logout` | 관리자 | 쿠키 삭제 후 302 → `/admin/login` |
+| GET | `/admin` | 관리자 | `admin/dashboard.html` (처리 대기 건수) |
+| GET | `/admin/accounts`, `/admin/accounts/{id}` | 관리자 | 계정 목록·상세, 제재 등록·해제 |
+| GET | `/admin/reports`, `/admin/reports/{id}` | 관리자 | 신고 목록·상세, 인정/기각 |
+| GET | `/admin/inspections`, `/admin/inspections/{id}` | 관리자 | 공간 검수 목록·상세, 승인/반려 |
+| GET | `/admin/charges`, `/admin/withdrawals` | 관리자 | 충전·출금 목록, 승인/거절 |
+| GET/POST | `/admin/notices`, `/admin/helps` | 관리자 | 공지·도움말 CRUD |
+| GET | `/admin/qnas`, `/admin/reviews` | 관리자 | Q&A 삭제, 리뷰 블라인드 |
 
-- 레이아웃은 `templates/fragments/layout.html` 하나를 쓰고, 정적 자산은 `static/{css,js,images}`에 있다.
+- 레이아웃은 `templates/fragments/layout.html`(이용자)과 `templates/admin/layout.html`(관리자, SB Admin 2)을 쓰고, 정적 자산은 `static/{css,js,images,vendor}`에 있다.
 - 예약 폼은 날짜와 가격 규칙 슬롯을 선택한다. 서버가 KST 기준 `startAt`/`endAt`을 계산하고 `ReservationService`가 가격·점유를 다시 검증한다.
 - 공간 상세의 예약 불가 표시는 `GET /api/v1/spaces/{id}/availability`와 같은 점유 상태 4종(`PENDING_APPROVAL`, `PENDING_PAYMENT`, `CONFIRMED`, `COMPLETED`)을 쓴다.
 - 비공개·삭제 공간은 404, 타인 예약 접근은 403을 HTML 오류 화면으로 렌더한다.
@@ -75,7 +84,7 @@ cd service-new && ./gradlew bootRun
 
 앱을 띄운 뒤 `http://localhost:8080/swagger-ui/index.html`에서 전체 API를 한국어 설명·요청/응답 예시와 함께 볼 수 있다. OpenAPI JSON은 `/v3/api-docs`다.
 
-1. `POST /api/v1/auth/login`을 실행해 `accessToken`을 복사한다(시드 관리자는 `admin@lookation.local`).
+1. `POST /api/v1/auth/login`을 실행해 `accessToken`을 복사한다(관리자 API용 토큰은 `/admin/login` 쿠키의 `access_token`을 쓴다. 시드 관리자는 `admin@lookation.local`).
 2. 오른쪽 위 **Authorize**에 `accessToken`만 붙여넣는다(`Bearer ` 접두사 없이). 토큰은 새로고침해도 유지된다.
 3. 자물쇠가 닫힌 API는 토큰이 필요하고, 열린 API는 공개 엔드포인트다. 이 구분은 `global/config/OpenApiConfig.kt`의 목록과 `SecurityConfig`의 `permitAll` 매처를 맞춘 것이다.
 

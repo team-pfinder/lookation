@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>이용자·호스트관리 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">이용자·호스트관리</h1>
+    <form method="get" th:action="@{/admin/accounts}" class="mb-3 form-inline">
+        <label class="mr-2" for="role">역할</label>
+        <select id="role" name="role" class="form-control mr-2">
+            <option value="">전체</option>
+            <option th:each="r : ${roles}" th:value="${r}" th:selected="${roleFilter == r}" th:text="${r}"></option>
+        </select>
+        <button class="btn btn-primary" type="submit">조회</button>
+    </form>
+    <div class="card shadow"><div class="card-body">
+        <div class="table-responsive"><table class="table table-bordered" width="100%">
+            <thead><tr><th>ID</th><th>이메일</th><th>이름</th><th>닉네임</th><th>역할</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${page.items}">
+                <td th:text="${a.id}"></td><td th:text="${a.email}"></td><td th:text="${a.name}"></td><td th:text="${a.nickname}"></td>
+                <td><span th:each="r : ${a.roles}" class="badge badge-secondary mx-1" th:text="${r}"></span></td>
+                <td><a class="btn btn-sm btn-primary" th:href="@{/admin/accounts/{id}(id=${a.id})}">상세</a></td>
+            </tr>
+            <tr th:if="${page.items.isEmpty()}"><td colspan="6" class="text-center">조회 결과가 없습니다.</td></tr>
+            </tbody>
+        </table></div>
+        <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/accounts(role=${roleFilter}, cursor=${page.nextCursor})}">다음</a></div>
+    </div></div>
+</section></body></html>

@@ -90,6 +90,22 @@ class ReviewService(
         return response(requireNotNull(reviewRepository.findById(reviewId)))
     }
 
+    @Transactional(readOnly = true)
+    fun listAll(cursor: Long?, limit: Int): PagedDto<ReviewDto> {
+        if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
+        val rows = reviewRepository.listAll(cursor, limit)
+        val images = reviewRepository.imageKeys(rows.map { it.id })
+        return PagedDto(
+            items = rows.map { it.toResponse(images[it.id].orEmpty()) },
+            nextCursor = if (rows.size == limit) rows.last().id else null,
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun get(id: Long): ReviewDto = response(
+        reviewRepository.findById(id) ?: throw NotFoundException("리뷰를 찾을 수 없습니다"),
+    )
+
     @Transactional
     fun blind(reviewId: Long) {
         reviewRepository.findById(reviewId) ?: throw NotFoundException("리뷰를 찾을 수 없습니다")

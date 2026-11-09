@@ -67,6 +67,38 @@ class AccountRepository(private val dsl: DSLContext) {
             .fetch(ACCOUNT_ROLES.ROLE)
             .map { AccountRole.valueOf(it) }
 
+    fun rolesFor(accountIds: List<Long>): Map<Long, List<AccountRole>> {
+        if (accountIds.isEmpty()) return emptyMap()
+        return dsl.select(ACCOUNT_ROLES.ACCOUNT_ID, ACCOUNT_ROLES.ROLE)
+            .from(ACCOUNT_ROLES)
+            .where(ACCOUNT_ROLES.ACCOUNT_ID.`in`(accountIds))
+            .fetch()
+            .groupBy({ it.value1() }, { AccountRole.valueOf(it.value2()) })
+    }
+
+    fun listByRole(role: AccountRole?, cursor: Long?, limit: Int): List<Account> {
+        var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
+        if (role != null) {
+            condition = condition.and(
+                ACCOUNTS.ID.`in`(
+                    dsl.select(ACCOUNT_ROLES.ACCOUNT_ID).from(ACCOUNT_ROLES).where(ACCOUNT_ROLES.ROLE.eq(role.name)),
+                ),
+            )
+        }
+        if (cursor != null) condition = condition.and(ACCOUNTS.ID.lt(cursor))
+        return dsl.selectFrom(ACCOUNTS).where(condition).orderBy(ACCOUNTS.ID.desc()).limit(limit)
+            .fetch().map { it.toAccount() }
+    }
+
+    fun countByRole(role: AccountRole?): Long =
+        if (role == null) dsl.fetchCount(ACCOUNTS).toLong()
+        else dsl.fetchCount(
+            ACCOUNTS,
+            ACCOUNTS.ID.`in`(
+                dsl.select(ACCOUNT_ROLES.ACCOUNT_ID).from(ACCOUNT_ROLES).where(ACCOUNT_ROLES.ROLE.eq(role.name)),
+            ),
+        ).toLong()
+
     private fun Record.toAccount(): Account = Account(
         id = get(ACCOUNTS.ID),
         email = get(ACCOUNTS.EMAIL),

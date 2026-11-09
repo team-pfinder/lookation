@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * Seeds the fixed local accounts: three members (one withdrawn), two hosts and the admin email
- * shared with `AdminSeeder`. Existing rows are skipped as-is, so the admin keeps its credential.
+ * Seeds the fixed local accounts: three members (one withdrawn) and two hosts.
+ * 관리자(`admin_users`)는 [AdminSeeder]가 만든다. 기존 행은 건너뛴다.
  *
  * Every seeded account uses the fixed password [SEED_PASSWORD] (documented in `service-new/README.md`).
  */
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional
 class AccountSeed(
     private val accounts: AccountRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val seedAdmin: SeedAdmin,
 ) : SeedStep {
 
     override val name = "계정"
@@ -29,7 +28,7 @@ class AccountSeed(
         var inserted = 0
         var skipped = 0
 
-        (SEED_ACCOUNTS + SeedAccount(seedAdmin.email, "Admin", "admin", AccountStatus.ACTIVE, listOf("ADMIN"))).forEach { seed ->
+        SEED_ACCOUNTS.forEach { seed ->
             if (accounts.existsByEmail(seed.email)) {
                 skipped++
                 return@forEach

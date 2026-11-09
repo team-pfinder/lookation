@@ -1,11 +1,12 @@
 package com.lookation.integration
 
-import com.lookation.jooq.tables.AccountRoles.ACCOUNT_ROLES
 import com.lookation.jooq.tables.Attachments.ATTACHMENTS
 import com.lookation.jooq.tables.Accounts.ACCOUNTS
 import com.lookation.jooq.tables.HostProfiles.HOST_PROFILES
 import com.lookation.jooq.tables.Reservations.RESERVATIONS
 import com.lookation.jooq.tables.Spaces.SPACES
+import com.lookation.repository.AdminUserRepository
+import com.lookation.service.AdminTokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
@@ -60,6 +61,12 @@ class SpaceFlowTest {
 
     @Autowired
     private lateinit var mailSender: CapturingMailSender
+
+    @Autowired
+    private lateinit var adminUserRepository: AdminUserRepository
+
+    @Autowired
+    private lateinit var adminTokenService: AdminTokenService
 
     private val client by lazy { RestClient.create("http://localhost:$port") }
 
@@ -416,17 +423,13 @@ class SpaceFlowTest {
     }
 
     private fun adminToken(): String {
-        val user = signup()
-        dsl.insertInto(ACCOUNT_ROLES)
-            .set(ACCOUNT_ROLES.ACCOUNT_ID, user.id)
-            .set(ACCOUNT_ROLES.ROLE, "ADMIN")
-            .execute()
-        val email = dsl.select(com.lookation.jooq.tables.Accounts.ACCOUNTS.EMAIL)
-            .from(com.lookation.jooq.tables.Accounts.ACCOUNTS)
-            .where(com.lookation.jooq.tables.Accounts.ACCOUNTS.ID.eq(user.id))
-            .fetchOne(com.lookation.jooq.tables.Accounts.ACCOUNTS.EMAIL)!!
-        val login = post("/api/v1/auth/login", mapOf("email" to email, "password" to "password123"))
-        return login.body!!["accessToken"] as String
+        val adminId = adminUserRepository.insert(
+            email = "fixture-${UUID.randomUUID()}@lookation.test",
+            passwordHash = "unused",
+            name = "admin",
+            nickname = "admin",
+        )
+        return adminTokenService.issue(adminId).accessToken
     }
 
     private fun upload(spaceId: Long, token: String): ApiResponse {

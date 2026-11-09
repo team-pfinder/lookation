@@ -1,8 +1,8 @@
 package com.lookation.integration
 
-import com.lookation.jooq.tables.AccountRoles.ACCOUNT_ROLES
-import com.lookation.jooq.tables.Accounts.ACCOUNTS
 import com.lookation.jooq.tables.Wallets.WALLETS
+import com.lookation.repository.AdminUserRepository
+import com.lookation.service.AdminTokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
@@ -53,6 +53,12 @@ class WalletFlowTest {
 
     @Autowired
     private lateinit var mailSender: CapturingMailSender
+
+    @Autowired
+    private lateinit var adminUserRepository: AdminUserRepository
+
+    @Autowired
+    private lateinit var adminTokenService: AdminTokenService
 
     private val client by lazy { RestClient.create("http://localhost:$port") }
 
@@ -145,15 +151,13 @@ class WalletFlowTest {
     }
 
     private fun adminToken(): String {
-        val user = signup()
-        dsl.insertInto(ACCOUNT_ROLES)
-            .set(ACCOUNT_ROLES.ACCOUNT_ID, user.id)
-            .set(ACCOUNT_ROLES.ROLE, "ADMIN")
-            .execute()
-        val email = dsl.select(ACCOUNTS.EMAIL).from(ACCOUNTS)
-            .where(ACCOUNTS.ID.eq(user.id)).fetchOne(ACCOUNTS.EMAIL)!!
-        return post("/api/v1/auth/login", mapOf("email" to email, "password" to "password123"))
-            .body!!["accessToken"] as String
+        val adminId = adminUserRepository.insert(
+            email = "fixture-${UUID.randomUUID()}@lookation.test",
+            passwordHash = "unused",
+            name = "admin",
+            nickname = "admin",
+        )
+        return adminTokenService.issue(adminId).accessToken
     }
 
     private fun topUp(accountId: Long, amount: Long) {

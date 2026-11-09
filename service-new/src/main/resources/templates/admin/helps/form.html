@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>도움말 등록·수정 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">도움말 등록·수정</h1>
+    <div class="card shadow"><div class="card-body">
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <form th:action="${helpId != null ? '/admin/helps/' + helpId : '/admin/helps'}" th:object="${form}" method="post">
+            <div class="form-group"><label>카테고리</label><input class="form-control" th:field="*{category}"><small class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></small></div>
+            <div class="form-group"><label>제목</label><input class="form-control" th:field="*{title}"><small class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small></div>
+            <div class="form-group"><label>본문</label><textarea class="form-control" th:field="*{content}" rows="6"></textarea><small class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></small></div>
+            <button class="btn btn-primary" type="submit">저장</button>
+            <a class="btn btn-secondary" th:href="@{/admin/helps}">목록</a>
+        </form>
+    </div></div>
+</section></body></html>

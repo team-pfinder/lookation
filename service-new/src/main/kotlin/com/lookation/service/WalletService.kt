@@ -98,6 +98,48 @@ class WalletService(
         return requireNotNull(withdrawalRepository.findById(withdrawalId)).toResponse()
     }
 
+    @Transactional(readOnly = true)
+    fun chargesByStatus(status: String?, cursor: Long?, limit: Int): com.lookation.dto.PagedDto<ChargeDto> {
+        if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
+        val filter = status?.let {
+            try {
+                ChargeStatus.valueOf(it)
+            } catch (_: IllegalArgumentException) {
+                throw BadRequestException("알 수 없는 충전 상태입니다")
+            }
+        }
+        val rows = chargeRepository.listByStatus(filter, cursor, limit)
+        return com.lookation.dto.PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
+    }
+
+    @Transactional(readOnly = true)
+    fun withdrawalsByStatus(status: String?, cursor: Long?, limit: Int): com.lookation.dto.PagedDto<WithdrawalDto> {
+        if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
+        val filter = status?.let {
+            try {
+                WithdrawalStatus.valueOf(it)
+            } catch (_: IllegalArgumentException) {
+                throw BadRequestException("알 수 없는 출금 상태입니다")
+            }
+        }
+        val rows = withdrawalRepository.listByStatus(filter, cursor, limit)
+        return com.lookation.dto.PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
+    }
+
+    @Transactional(readOnly = true)
+    fun getCharge(id: Long): ChargeDto =
+        (chargeRepository.findById(id) ?: throw NotFoundException("충전 신청을 찾을 수 없습니다")).toResponse()
+
+    @Transactional(readOnly = true)
+    fun getWithdrawal(id: Long): WithdrawalDto =
+        (withdrawalRepository.findById(id) ?: throw NotFoundException("출금 신청을 찾을 수 없습니다")).toResponse()
+
+    @Transactional(readOnly = true)
+    fun pendingChargeCount(): Long = chargeRepository.countByStatus(ChargeStatus.REQUESTED)
+
+    @Transactional(readOnly = true)
+    fun pendingWithdrawalCount(): Long = withdrawalRepository.countByStatus(WithdrawalStatus.REQUESTED)
+
     private fun com.lookation.repository.ChargeRow.toResponse() = ChargeDto(
         id = id,
         amount = amount,

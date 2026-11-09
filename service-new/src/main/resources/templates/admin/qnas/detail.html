@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Q&amp;A 상세 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">Q&amp;A 상세</h1>
+    <div class="card shadow"><div class="card-body">
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <dl class="row"><dt class="col-sm-2">제목</dt><dd class="col-sm-10" th:text="${qna.title}"></dd>
+        <dt class="col-sm-2">본문</dt><dd class="col-sm-10" th:text="${qna.content}"></dd>
+        <dt class="col-sm-2">답변</dt><dd class="col-sm-10" th:text="${qna.reply != null ? qna.reply : '-'}"></dd>
+        <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${qna.status}"></dd></dl>
+        <form th:action="@{/admin/qnas/{id}/delete(id=${qna.id})}" method="post"><button class="btn btn-danger" type="submit">삭제</button></form>
+    </div></div>
+</section></body></html>

@@ -1,5 +1,6 @@
 package com.lookation.global.security
 
+import com.lookation.service.AdminTokenService
 import com.lookation.service.TokenService
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -19,12 +20,13 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.savedrequest.NullRequestCache
 
 /**
- * 체인 두 개로 나눈다.
+ * 체인 세 개로 나눈다.
  *
- * - API 체인(`/api` 이하): 기존 계약 그대로. `Authorization: Bearer` 헤더만 읽고 CSRF를 끈다.
+ * - API 체인: 기존 계약 그대로. `Authorization: Bearer` 헤더만 읽고 CSRF를 끈다.
+ * - 관리자 체인: 관리자 전용 쿠키 JWT + CSRF. 관리자 경로는 `ROLE_ADMIN`만.
  * - HTML 체인(나머지): 쿠키 JWT + CSRF. 뷰가 서비스를 직접 호출하는 SSR 화면용이다.
  *
- * 두 체인 모두 `STATELESS`다. HTML 인증은 세션이 아니라 쿠키로 유지한다.
+ * 세 체인 모두 `STATELESS`다. HTML 인증은 세션이 아니라 쿠키로 유지한다.
  */
 @Configuration
 @EnableConfigurationProperties(HtmlProperties::class)
@@ -32,6 +34,8 @@ class SecurityConfig(
     private val authCookies: AuthCookies,
     private val cookieBearerTokenResolver: CookieBearerTokenResolver,
     private val tokenService: TokenService,
+    private val adminTokenService: AdminTokenService,
+    private val adminAccessDeniedHandler: AdminAccessDeniedHandler,
     private val jwtDecoder: JwtDecoder,
     private val htmlProperties: HtmlProperties,
 ) {
@@ -84,6 +88,37 @@ class SecurityConfig(
 
     @Bean
     @Order(2)
+    fun adminSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http {
+            securityMatcher("/admin/**")
+            csrf { csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse() }
+            httpBasic { disable() }
+            formLogin { disable() }
+            logout { disable() }
+            sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
+            requestCache { requestCache = NullRequestCache() }
+            authorizeHttpRequests {
+                authorize(HttpMethod.GET, "/admin/login", permitAll)
+                authorize(HttpMethod.POST, "/admin/login", permitAll)
+                authorize("/admin/**", hasAuthority("ROLE_ADMIN"))
+            }
+            exceptionHandling {
+                authenticationEntryPoint = AdminLoginRedirectEntryPoint()
+                accessDeniedHandler = adminAccessDeniedHandler
+            }
+            oauth2ResourceServer {
+                bearerTokenResolver = cookieBearerTokenResolver
+                jwt { jwtAuthenticationConverter = claimRolesConverter() }
+            }
+            addFilterBefore<BearerTokenAuthenticationFilter>(
+                AdminAccessTokenRefreshFilter(adminTokenService, jwtDecoder, authCookies, htmlProperties),
+            )
+        }
+        return http.build()
+    }
+
+    @Bean
+    @Order(3)
     fun htmlSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             securityMatcher("/**")
@@ -107,6 +142,7 @@ class SecurityConfig(
                 authorize(HttpMethod.POST, "/password-reset/confirm", permitAll)
                 authorize("/css/**", permitAll)
                 authorize("/js/**", permitAll)
+                authorize("/vendor/**", permitAll)
                 authorize("/images/**", permitAll)
                 authorize("/fonts/**", permitAll)
                 authorize("/uploads/**", permitAll)

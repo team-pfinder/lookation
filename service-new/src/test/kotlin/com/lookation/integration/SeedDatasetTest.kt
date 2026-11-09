@@ -60,13 +60,12 @@ class SeedDatasetTest {
         val postgres = PostgreSQLContainer(DockerImageName.parse("postgres:18-alpine"))
 
         private const val SEED_PASSWORD = "lookation1234!"
-        private const val ADMIN_PASSWORD = "lookation-admin1!"
         private val mapType = object : ParameterizedTypeReference<Map<String, Any>>() {}
         private val listType = object : ParameterizedTypeReference<List<Map<String, Any>>>() {}
         private val stringListType = object : ParameterizedTypeReference<List<String>>() {}
 
         private val TABLES = listOf(
-            "accounts", "account_roles", "host_profiles", "sanctions", "spaces", "space_facilities",
+            "accounts", "account_roles", "admin_users", "host_profiles", "sanctions", "spaces", "space_facilities",
             "attachments", "price_rules", "reservations", "reservation_events", "wallets", "wallet_entries",
             "charges", "settlements", "withdrawals", "inspections", "job_runs", "messages",
             "reports", "reviews", "review_replies", "qnas", "qna_replies", "notices", "helps",
@@ -79,6 +78,12 @@ class SeedDatasetTest {
 
     @Autowired
     private lateinit var dsl: DSLContext
+
+    @Autowired
+    private lateinit var adminUserRepository: com.lookation.repository.AdminUserRepository
+
+    @Autowired
+    private lateinit var adminTokenService: com.lookation.service.AdminTokenService
 
     @Value("\${local.server.port}")
     private var port: Int = 0
@@ -94,7 +99,8 @@ class SeedDatasetTest {
         service.seed()
 
         val counts = tableCounts()
-        assertThat(counts["accounts"]).isEqualTo(6)
+        assertThat(counts["accounts"]).isEqualTo(5)
+        assertThat(counts["admin_users"]).isEqualTo(1)
         assertThat(counts["spaces"]).isEqualTo(9)
         assertThat(counts["reservations"]).isEqualTo(10)
         assertThat(counts["attachments"]).isEqualTo(11)
@@ -254,7 +260,9 @@ class SeedDatasetTest {
             .toBodilessEntity()
         assertThat(verification.statusCode.value()).isEqualTo(204)
         val hostToken = login("seed-host-1@lookation.local", SEED_PASSWORD)
-        val adminToken = login("admin@lookation.local", ADMIN_PASSWORD)
+        val adminToken = adminTokenService.issue(
+            requireNotNull(adminUserRepository.findByEmail("admin@lookation.local")).id,
+        ).accessToken
 
         // 1. 공간 검색·상세
         val spaceItems = get("/api/v1/spaces", null)["items"] as List<*>

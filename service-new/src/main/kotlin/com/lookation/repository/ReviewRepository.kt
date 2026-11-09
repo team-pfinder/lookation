@@ -56,6 +56,12 @@ class ReviewRepository(private val dsl: DSLContext) {
             .map { it.toRow() }
     }
 
+    fun listAll(cursor: Long?, limit: Int): List<ReviewRow> {
+        var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
+        if (cursor != null) condition = condition.and(REVIEWS.ID.lt(cursor))
+        return baseQuery().where(condition).orderBy(REVIEWS.ID.desc()).limit(limit).fetch().map { it.toRow() }
+    }
+
     fun blind(id: Long): Int =
         dsl.update(REVIEWS)
             .set(REVIEWS.BLINDED_AT, OffsetDateTime.now())

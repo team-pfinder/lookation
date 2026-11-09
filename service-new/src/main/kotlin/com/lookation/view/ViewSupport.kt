@@ -21,6 +21,12 @@ data class Viewer(
     val roles: List<AccountRole>,
 )
 
+/** 관리자 콘솔 화면의 로그인 관리자 정보. 일반 [Viewer]와 분리된 테이블 기준이다. */
+data class AdminViewer(
+    val id: Long,
+    val nickname: String,
+)
+
 /**
  * 예약 폼·상세 화면에 보여줄 슬롯. 가격 규칙과 점유 구간을 합쳐 만든다.
  *
@@ -38,6 +44,9 @@ data class BookingSlot(
 fun Jwt.accountIdOrNull(): Long? = subject?.toLongOrNull()
 
 fun Jwt.requireAccountId(): Long =
+    accountIdOrNull() ?: throw UnauthorizedException("토큰 주체가 없습니다")
+
+fun Jwt.requireAdminId(): Long =
     accountIdOrNull() ?: throw UnauthorizedException("토큰 주체가 없습니다")
 
 /** 로그인 후 이동할 경로. 열린 리다이렉트를 막기 위해 사이트 내부 상대 경로만 허용한다. */

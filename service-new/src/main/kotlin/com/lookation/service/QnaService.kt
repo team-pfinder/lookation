@@ -82,6 +82,22 @@ class QnaService(
         }
     }
 
+    @Transactional(readOnly = true)
+    fun listAll(cursor: Long?, limit: Int): PagedDto<QnaDto> {
+        if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
+        val rows = qnaRepository.listAll(cursor, limit)
+        return PagedDto(
+            items = rows.map { it.toResponse() },
+            nextCursor = if (rows.size == limit) rows.last().id else null,
+        )
+    }
+
+    @Transactional
+    fun deleteByAdmin(qnaId: Long) {
+        qnaRepository.findById(qnaId) ?: throw NotFoundException("질문을 찾을 수 없습니다")
+        if (qnaRepository.deleteAny(qnaId) != 1) throw NotFoundException("질문을 찾을 수 없습니다")
+    }
+
     private fun response(qna: QnaRow): QnaDto = qna.toResponse()
 
     private fun QnaRow.toResponse() = QnaDto(

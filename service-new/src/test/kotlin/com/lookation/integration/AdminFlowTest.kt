@@ -2,6 +2,8 @@ package com.lookation.integration
 
 import com.lookation.jooq.tables.Accounts.ACCOUNTS
 import com.lookation.jooq.tables.Spaces.SPACES
+import com.lookation.repository.AdminUserRepository
+import com.lookation.service.AdminTokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
@@ -15,16 +17,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
-import org.springframework.security.oauth2.jwt.JwtClaimsSet
-import org.springframework.security.oauth2.jwt.JwtEncoder
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -53,8 +51,9 @@ class AdminFlowTest {
     private var port: Int = 0
 
     @Autowired private lateinit var dsl: DSLContext
-    @Autowired private lateinit var jwtEncoder: JwtEncoder
     @Autowired private lateinit var mailSender: CapturingMailSender
+    @Autowired private lateinit var adminUserRepository: AdminUserRepository
+    @Autowired private lateinit var adminTokenService: AdminTokenService
 
     private val client by lazy { RestClient.create("http://localhost:$port") }
     private data class ApiResponse(val status: HttpStatusCode, val body: Map<String, Any>?, val raw: String? = null)
@@ -63,7 +62,7 @@ class AdminFlowTest {
     @Test
     fun `sanction blocks writes but allows login and can be revoked`() {
         val member = signup()
-        val adminToken = tokenFor(account("admin"), "ADMIN")
+        val adminToken = adminToken()
 
         val applied = post(
             "/api/v1/admin/sanctions",
@@ -92,7 +91,7 @@ class AdminFlowTest {
 
     @Test
     fun `admin manages notices and helps`() {
-        val adminToken = tokenFor(account("admin"), "ADMIN")
+        val adminToken = adminToken()
         val notice = post(
             "/api/v1/admin/notices",
             mapOf("title" to "점검 안내", "content" to "새벽 점검", "important" to true),
@@ -120,7 +119,7 @@ class AdminFlowTest {
     fun `report is recorded once and decided by an admin`() {
         val member = signup()
         val spaceId = publishedSpace(account("host"))
-        val adminToken = tokenFor(account("admin"), "ADMIN")
+        val adminToken = adminToken()
 
         val report = post("/api/v1/reports", mapOf("targetType" to "SPACE", "targetId" to spaceId, "reason" to "허위 정보"), member.access)
         assertThat(report.status.value()).isEqualTo(HttpStatus.OK.value())
@@ -161,6 +160,16 @@ class AdminFlowTest {
             .fetchOne()!!
             .value1()
 
+    private fun adminToken(): String {
+        val adminId = adminUserRepository.insert(
+            email = "fixture-${UUID.randomUUID()}@lookation.test",
+            passwordHash = "unused",
+            name = "admin",
+            nickname = "admin",
+        )
+        return adminTokenService.issue(adminId).accessToken
+    }
+
     private fun publishedSpace(hostId: Long): Long =
         dsl.insertInto(SPACES)
             .set(SPACES.HOST_ID, hostId)
@@ -174,17 +183,7 @@ class AdminFlowTest {
             .fetchOne()!!
             .value1()
 
-    private fun tokenFor(accountId: Long, vararg roles: String): String {
-        val now = Instant.now()
-        val claims = JwtClaimsSet.builder()
-            .issuer("lookation")
-            .subject(accountId.toString())
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(300))
-            .claim("roles", roles.toList())
-            .build()
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).tokenValue
-    }
+
 
     private fun post(path: String, body: Map<String, Any>, token: String?): ApiResponse =
         try {

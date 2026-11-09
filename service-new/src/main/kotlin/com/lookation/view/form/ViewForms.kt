@@ -58,6 +58,37 @@ data class PasswordResetViewForm(
     val newPassword: String = "",
 )
 
+data class SanctionViewForm(
+    @field:Positive @field:Max(3)
+    val level: Int? = null,
+
+    @field:NotBlank @field:Size(max = 300)
+    val reason: String = "",
+
+    val endsAt: String? = null,
+)
+
+data class NoticeViewForm(
+    @field:NotBlank @field:Size(max = 200)
+    val title: String = "",
+
+    @field:NotBlank
+    val content: String = "",
+
+    val important: Boolean = false,
+)
+
+data class HelpViewForm(
+    @field:NotBlank @field:Size(max = 50)
+    val category: String = "",
+
+    @field:NotBlank @field:Size(max = 200)
+    val title: String = "",
+
+    @field:NotBlank
+    val content: String = "",
+)
+
 data class ReservationViewForm(
     @field:NotNull
     @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

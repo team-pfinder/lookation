@@ -36,6 +36,10 @@ class SanctionService(private val sanctionRepository: SanctionRepository) {
         return requireNotNull(sanctionRepository.findById(id)).toResponse()
     }
 
+    @Transactional(readOnly = true)
+    fun listByAccount(accountId: Long): List<SanctionDto> =
+        sanctionRepository.listByAccount(accountId).map { it.toResponse() }
+
     @Transactional
     fun revoke(id: Long) {
         sanctionRepository.findById(id) ?: throw NotFoundException("제재를 찾을 수 없습니다")
@@ -51,5 +55,6 @@ class SanctionService(private val sanctionRepository: SanctionRepository) {
         level = level,
         startsAt = startsAt,
         endsAt = endsAt,
+        revokedAt = revokedAt,
     )
 }

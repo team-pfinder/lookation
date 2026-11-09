@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>도움말 상세 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">도움말 상세</h1>
+    <div class="card shadow"><div class="card-body">
+        <dl class="row"><dt class="col-sm-2">카테고리</dt><dd class="col-sm-10" th:text="${help.category}"></dd>
+        <dt class="col-sm-2">제목</dt><dd class="col-sm-10" th:text="${help.title}"></dd>
+        <dt class="col-sm-2">본문</dt><dd class="col-sm-10" th:text="${help.content}"></dd></dl>
+        <a class="btn btn-primary" th:href="@{/admin/helps/{id}/edit(id=${help.id})}">수정</a>
+        <form class="d-inline" th:action="@{/admin/helps/{id}/delete(id=${help.id})}" method="post"><button class="btn btn-danger" type="submit">삭제</button></form>
+    </div></div>
+</section></body></html>

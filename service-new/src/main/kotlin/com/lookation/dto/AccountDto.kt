@@ -20,7 +20,7 @@ data class AccountDto(
 
     @field:ArraySchema(
         schema = Schema(example = "MEMBER"),
-        arraySchema = Schema(description = "계정 역할 목록. `MEMBER`, `HOST`, `ADMIN` 중 하나 이상입니다."),
+        arraySchema = Schema(description = "계정 역할 목록. `MEMBER`, `HOST` 중 하나 이상입니다."),
     )
     val roles: List<AccountRole>,
 )

@@ -2,7 +2,7 @@ package com.lookation.global.seed
 
 import com.lookation.global.security.AdminProperties
 import com.lookation.global.security.AdminSeeder
-import com.lookation.repository.AccountRepository
+import com.lookation.repository.AdminUserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
@@ -46,7 +46,7 @@ class InitializeServiceActivationTest {
         ApplicationContextRunner()
             .withUserConfiguration(AdminSeeder::class.java, InitializeService::class.java)
             .withBean(AdminProperties::class.java, Supplier { AdminProperties() })
-            .withBean(AccountRepository::class.java, Supplier { mock(AccountRepository::class.java) })
+            .withBean(AdminUserRepository::class.java, Supplier { mock(AdminUserRepository::class.java) })
             .withBean(PasswordEncoder::class.java, Supplier { mock(PasswordEncoder::class.java) })
             .withPropertyValues("spring.profiles.active=local", "lookation.seed.enabled=true")
             .run { context ->

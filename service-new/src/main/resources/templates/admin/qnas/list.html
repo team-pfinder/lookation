@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Q&amp;A관리 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">Q&amp;A관리</h1>
+    <div class="card shadow"><div class="card-body"><table class="table table-bordered">
+        <thead><tr><th>ID</th><th>제목</th><th>상태</th><th></th></tr></thead>
+        <tbody><tr th:each="q : ${page.items}">
+            <td th:text="${q.id}"></td><td th:text="${q.title}"></td><td th:text="${q.status}"></td>
+            <td><a class="btn btn-sm btn-primary" th:href="@{/admin/qnas/{id}(id=${q.id})}">상세</a></td>
+        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="4" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
+        <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/qnas(cursor=${page.nextCursor})}">다음</a></div>
+    </div></div>
+</section></body></html>

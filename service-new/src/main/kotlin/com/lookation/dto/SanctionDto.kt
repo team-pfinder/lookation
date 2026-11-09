@@ -22,4 +22,7 @@ data class SanctionDto(
 
     @field:Schema(description = "제재 종료 일시. 기간 제한이 없으면 null입니다.", example = "2026-12-20T18:00:00+09:00")
     val endsAt: OffsetDateTime?,
+
+    @field:Schema(description = "제재 해제 일시. 해제 전이면 null입니다.", example = "2026-12-20T18:00:00+09:00")
+    val revokedAt: OffsetDateTime? = null,
 )

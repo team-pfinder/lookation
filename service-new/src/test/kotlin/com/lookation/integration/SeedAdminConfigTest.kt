@@ -45,11 +45,7 @@ class SeedAdminConfigTest {
         InitializeService(steps).seed()
 
         val admins = dsl.resultQuery(
-            """
-            select a.email
-            from accounts a join account_roles r on r.account_id = a.id
-            where r.role = 'ADMIN'
-            """.trimIndent(),
+            "select email from admin_users",
         ).fetch(0, String::class.java)
 
         assertThat(admins).containsExactly("ops@lookation.local")

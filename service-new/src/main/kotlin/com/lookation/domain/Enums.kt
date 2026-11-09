@@ -8,7 +8,6 @@ enum class AccountStatus {
 enum class AccountRole {
     MEMBER,
     HOST,
-    ADMIN,
 }
 
 enum class ActorType {

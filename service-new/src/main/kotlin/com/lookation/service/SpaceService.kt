@@ -98,6 +98,13 @@ class SpaceService(
         return response(space)
     }
 
+    @Transactional(readOnly = true)
+    fun getForAdmin(spaceId: Long): SpaceDto {
+        val space = spaceRepository.findById(spaceId)
+            ?: throw NotFoundException("공간을 찾을 수 없습니다")
+        return response(space)
+    }
+
     @Transactional
     fun close(accountId: Long, spaceId: Long): SpaceDto {
         val space = owned(accountId, spaceId)

@@ -47,6 +47,11 @@ class ReportService(
 
     @Transactional(readOnly = true)
     fun list(status: String?, cursor: Long?, limit: Int): PagedDto<ReportDto> {
+        return list(status, null, cursor, limit)
+    }
+
+    @Transactional(readOnly = true)
+    fun list(status: String?, targetType: String?, cursor: Long?, limit: Int): PagedDto<ReportDto> {
         if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
         val statusFilter = status?.let {
             try {
@@ -55,9 +60,23 @@ class ReportService(
                 throw BadRequestException("알 수 없는 신고 상태입니다")
             }
         }
-        val rows = reportRepository.list(statusFilter, cursor, limit)
+        val targetFilter = targetType?.let {
+            try {
+                ReportTarget.valueOf(it)
+            } catch (_: IllegalArgumentException) {
+                throw BadRequestException("알 수 없는 신고 대상입니다")
+            }
+        }
+        val rows = reportRepository.list(statusFilter, targetFilter, cursor, limit)
         return PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
     }
+
+    @Transactional(readOnly = true)
+    fun pendingCount(): Long = reportRepository.countByStatus(ReportStatus.RECEIVED)
+
+    @Transactional(readOnly = true)
+    fun get(id: Long): com.lookation.dto.ReportDto =
+        (reportRepository.findById(id) ?: throw NotFoundException("신고를 찾을 수 없습니다")).toResponse()
 
     @Transactional
     fun decide(adminId: Long, reportId: Long, accepted: Boolean): ReportDto {

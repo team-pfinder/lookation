@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>신고 상세 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">신고 상세</h1>
+    <div class="card shadow mb-4"><div class="card-body">
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <dl class="row">
+            <dt class="col-sm-2">ID</dt><dd class="col-sm-10" th:text="${report.id}"></dd>
+            <dt class="col-sm-2">신고자</dt><dd class="col-sm-10" th:text="${report.reporterId}"></dd>
+            <dt class="col-sm-2">대상</dt><dd class="col-sm-10" th:text="${report.targetType} + ' #' + ${report.targetId}"></dd>
+            <dt class="col-sm-2">사유</dt><dd class="col-sm-10" th:text="${report.reason}"></dd>
+            <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${report.status}"></dd>
+            <dt class="col-sm-2">일시</dt><dd class="col-sm-10" th:text="${report.createdAt}"></dd>
+        </dl>
+        <form class="d-inline" th:action="@{/admin/reports/{id}/decision(id=${report.id})}" method="post" th:if="${report.status.name() == 'RECEIVED'}">
+            <input type="hidden" name="accepted" value="true"><button class="btn btn-success" type="submit">인정</button>
+        </form>
+        <form class="d-inline" th:action="@{/admin/reports/{id}/decision(id=${report.id})}" method="post" th:if="${report.status.name() == 'RECEIVED'}">
+            <input type="hidden" name="accepted" value="false"><button class="btn btn-danger" type="submit">기각</button>
+        </form>
+    </div></div>
+</section></body></html>

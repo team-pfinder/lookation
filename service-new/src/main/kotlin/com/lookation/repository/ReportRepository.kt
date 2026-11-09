@@ -38,9 +38,13 @@ class ReportRepository(private val dsl: DSLContext) {
             )
         }
 
-    fun list(status: ReportStatus?, cursor: Long?, limit: Int): List<ReportRow> {
+    fun list(status: ReportStatus?, cursor: Long?, limit: Int): List<ReportRow> =
+        list(status, null, cursor, limit)
+
+    fun list(status: ReportStatus?, targetType: ReportTarget?, cursor: Long?, limit: Int): List<ReportRow> {
         var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
         if (status != null) condition = condition.and(REPORTS.STATUS.eq(status.name))
+        if (targetType != null) condition = condition.and(REPORTS.TARGET_TYPE.eq(targetType.name))
         if (cursor != null) condition = condition.and(REPORTS.ID.lt(cursor))
         return dsl.selectFrom(REPORTS)
             .where(condition)
@@ -54,6 +58,9 @@ class ReportRepository(private val dsl: DSLContext) {
                 )
             }
     }
+
+    fun countByStatus(status: ReportStatus): Long =
+        dsl.fetchCount(REPORTS, REPORTS.STATUS.eq(status.name)).toLong()
 
     fun decide(id: Long, accepted: Boolean, adminId: Long): Int =
         dsl.update(REPORTS)

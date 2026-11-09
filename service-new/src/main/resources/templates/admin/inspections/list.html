@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>공간검수 · 관리자 콘솔</title></head>
+<body><section>
+    <h1 class="h3 mb-4 text-gray-800">공간검수</h1>
+    <div class="card shadow"><div class="card-body"><table class="table table-bordered">
+        <thead><tr><th>ID</th><th>공간</th><th>호스트</th><th>신청</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="i : ${inspections}">
+            <td th:text="${i.spaceId}"></td><td><a th:href="@{/admin/inspections/{id}(id=${i.spaceId})}" th:text="${i.spaceName}"></a></td>
+            <td th:text="${i.hostId}"></td><td th:text="${i.requestedAt}"></td>
+            <td><a class="btn btn-sm btn-primary" th:href="@{/admin/inspections/{id}(id=${i.spaceId})}">상세</a></td>
+        </tr>
+        <tr th:if="${inspections.isEmpty()}"><td colspan="5" class="text-center">검수 대기 공간이 없습니다.</td></tr>
+        </tbody></table>
+    </div></div>
+</section></body></html>

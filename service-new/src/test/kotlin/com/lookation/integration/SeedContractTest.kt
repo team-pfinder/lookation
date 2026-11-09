@@ -7,6 +7,7 @@ import com.lookation.global.seed.InitializeService
 import com.lookation.global.seed.SeedResult
 import com.lookation.jooq.tables.Accounts.ACCOUNTS
 import com.lookation.repository.AccountRepository
+import com.lookation.repository.AdminUserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
@@ -50,6 +51,9 @@ class SeedContractTest {
     private lateinit var accountRepository: AccountRepository
 
     @Autowired
+    private lateinit var adminUserRepository: AdminUserRepository
+
+    @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
@@ -59,20 +63,18 @@ class SeedContractTest {
     fun `seeding twice keeps one row per fixed email and defers to the admin seeder`() {
         val service = InitializeService(listOf(accountSeed))
 
-        assertThat(accountCount(ADMIN_EMAIL)).isEqualTo(1)
+        assertThat(adminUserRepository.existsByEmail(ADMIN_EMAIL)).isTrue()
+        assertThat(accountCount(ADMIN_EMAIL)).isEqualTo(0)
 
         val first = service.seed()
         val second = service.seed()
 
-        assertThat(first).isEqualTo(SeedResult(inserted = 5, skipped = 1))
-        assertThat(second).isEqualTo(SeedResult(inserted = 0, skipped = 6))
+        assertThat(first).isEqualTo(SeedResult(inserted = 5, skipped = 0))
+        assertThat(second).isEqualTo(SeedResult(inserted = 0, skipped = 5))
 
-        listOf(ADMIN_EMAIL, MEMBER_EMAIL).forEach { email ->
-            assertThat(accountCount(email)).describedAs(email).isEqualTo(1)
-        }
+        assertThat(accountCount(MEMBER_EMAIL)).isEqualTo(1)
+        assertThat(accountCount(ADMIN_EMAIL)).isEqualTo(0)
 
-        assertThat(accountRepository.roles(accountRepository.findByEmail(ADMIN_EMAIL)!!.id))
-            .containsExactly(AccountRole.ADMIN)
         assertThat(accountRepository.roles(accountRepository.findByEmail(MEMBER_EMAIL)!!.id))
             .containsExactly(AccountRole.MEMBER)
 

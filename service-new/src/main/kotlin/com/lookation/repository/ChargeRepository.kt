@@ -51,6 +51,25 @@ class ChargeRepository(private val dsl: DSLContext) {
                 )
             }
 
+    fun listByStatus(status: ChargeStatus?, cursor: Long?, limit: Int): List<ChargeRow> {
+        var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
+        if (status != null) condition = condition.and(CHARGES.STATUS.eq(status.name))
+        if (cursor != null) condition = condition.and(CHARGES.ID.lt(cursor))
+        return dsl.selectFrom(CHARGES).where(condition).orderBy(CHARGES.ID.desc()).limit(limit).fetch()
+            .map {
+                ChargeRow(
+                    id = it.get(CHARGES.ID),
+                    accountId = it.get(CHARGES.ACCOUNT_ID),
+                    amount = it.get(CHARGES.AMOUNT),
+                    depositorName = it.get(CHARGES.DEPOSITOR_NAME),
+                    status = ChargeStatus.valueOf(it.get(CHARGES.STATUS)),
+                )
+            }
+    }
+
+    fun countByStatus(status: ChargeStatus): Long =
+        dsl.fetchCount(CHARGES, CHARGES.STATUS.eq(status.name)).toLong()
+
     fun updateStatus(id: Long, expected: ChargeStatus, status: ChargeStatus, adminId: Long): Int =
         dsl.update(CHARGES)
             .set(CHARGES.STATUS, status.name)

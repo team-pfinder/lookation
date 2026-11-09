@@ -57,6 +57,24 @@ class WithdrawalRepository(private val dsl: DSLContext) {
                 )
             }
 
+    fun listByStatus(status: WithdrawalStatus?, cursor: Long?, limit: Int): List<WithdrawalRow> {
+        var condition: org.jooq.Condition = org.jooq.impl.DSL.trueCondition()
+        if (status != null) condition = condition.and(WITHDRAWALS.STATUS.eq(status.name))
+        if (cursor != null) condition = condition.and(WITHDRAWALS.ID.lt(cursor))
+        return dsl.selectFrom(WITHDRAWALS).where(condition).orderBy(WITHDRAWALS.ID.desc()).limit(limit).fetch()
+            .map {
+                WithdrawalRow(
+                    id = it.get(WITHDRAWALS.ID),
+                    accountId = it.get(WITHDRAWALS.ACCOUNT_ID),
+                    amount = it.get(WITHDRAWALS.AMOUNT),
+                    status = WithdrawalStatus.valueOf(it.get(WITHDRAWALS.STATUS)),
+                )
+            }
+    }
+
+    fun countByStatus(status: WithdrawalStatus): Long =
+        dsl.fetchCount(WITHDRAWALS, WITHDRAWALS.STATUS.eq(status.name)).toLong()
+
     fun updateStatus(id: Long, expected: WithdrawalStatus, status: WithdrawalStatus, adminId: Long): Int =
         dsl.update(WITHDRAWALS)
             .set(WITHDRAWALS.STATUS, status.name)

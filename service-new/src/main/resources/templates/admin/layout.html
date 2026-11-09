@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:replace="${title}">관리자 콘솔 · Lookation</title>
+    <link rel="stylesheet" th:href="@{/vendor/fontawesome-free/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/sb-admin-2.min.css}">
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar: 레거시 Admin_Sidebar 5개 그룹을 그대로 옮긴다 -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
+            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-laugh-wink"></i></div>
+            <div class="sidebar-brand-text mx-3">Lookation Admin</div>
+        </a>
+        <hr class="sidebar-divider my-0">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin}"><i class="fas fa-fw fa-tachometer-alt"></i><span>main</span></a>
+        </li>
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">관리</div>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages1" aria-expanded="true" aria-controls="collapsePages1">
+                <i class="fas fa-fw fa-folder"></i><span>공지관리</span>
+            </a>
+            <div id="collapsePages1" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">도움말:</h6>
+                    <a class="collapse-item" th:href="@{/admin/helps}">도움말 목록</a>
+                    <a class="collapse-item" th:href="@{/admin/helps/new}">도움말 등록</a>
+                    <div class="collapse-divider"></div>
+                    <h6 class="collapse-header">공지사항:</h6>
+                    <a class="collapse-item" th:href="@{/admin/notices}">공지사항 목록</a>
+                    <a class="collapse-item" th:href="@{/admin/notices/new}">공지사항 등록</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages2" aria-expanded="true" aria-controls="collapsePages2">
+                <i class="fas fa-fw fa-folder"></i><span>신고관리</span>
+            </a>
+            <div id="collapsePages2" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">신고:</h6>
+                    <a class="collapse-item" th:href="@{/admin/reports}">신고내역</a>
+                    <a class="collapse-item" th:href="@{/admin/reviews}">블라인드 관리</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages3" aria-expanded="true" aria-controls="collapsePages3">
+                <i class="fas fa-fw fa-folder"></i><span>회원관리</span>
+            </a>
+            <div id="collapsePages3" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">게시글관리:</h6>
+                    <a class="collapse-item" th:href="@{/admin/qnas}">Q&amp;A관리</a>
+                    <a class="collapse-item" th:href="@{/admin/reviews}">리뷰관리</a>
+                    <h6 class="collapse-header">회원관리:</h6>
+                    <a class="collapse-item" th:href="@{/admin/accounts}">이용자·호스트관리</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages4" aria-expanded="true" aria-controls="collapsePages4">
+                <i class="fas fa-fw fa-folder"></i><span>마일리지 관리</span>
+            </a>
+            <div id="collapsePages4" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">마일리지관리:</h6>
+                    <a class="collapse-item" th:href="@{/admin/charges}">충전관리</a>
+                    <a class="collapse-item" th:href="@{/admin/withdrawals}">출금관리</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages5" aria-expanded="true" aria-controls="collapsePages5">
+                <i class="fas fa-fw fa-folder"></i><span>공간 관리</span>
+            </a>
+            <div id="collapsePages5" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">공간관리:</h6>
+                    <a class="collapse-item" th:href="@{/admin/inspections}">공간검수</a>
+                </div>
+            </div>
+        </li>
+
+        <hr class="sidebar-divider d-none d-md-block">
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+    </ul>
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" th:text="${adminViewer != null ? adminViewer.nickname : '관리자'} + '님'">관리자님</span>
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <div class="dropdown-divider"></div>
+                            <form th:action="@{/admin/logout}" method="post">
+                                <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>로그아웃</button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="alert alert-info" role="alert" th:if="${notice}" th:text="${notice}"></div>
+                <div class="alert alert-danger" role="alert" th:if="${error != null and renderedErrorLocally == null}" th:text="${error}"></div>
+                <div th:insert="${content}"></div>
+            </div>
+        </div>
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto"><span>Copyright &copy; Lookation Admin</span></div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+</body>
+</html>
