@@ -277,6 +277,9 @@ class SpaceRepository(private val dsl: DSLContext) {
             .execute()
     }
 
+    fun countPendingInspections(): Long =
+        dsl.fetchCount(INSPECTIONS, INSPECTIONS.STATUS.eq(SpaceStatus.PENDING_INSPECTION.name)).toLong()
+
     fun pendingInspections(): List<InspectionRow> =
         dsl.selectFrom(INSPECTIONS)
             .where(INSPECTIONS.STATUS.eq(SpaceStatus.PENDING_INSPECTION.name))

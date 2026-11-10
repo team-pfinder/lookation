@@ -247,6 +247,9 @@ class SpaceService(
     }
 
     @Transactional(readOnly = true)
+    fun pendingInspectionCount(): Long = spaceRepository.countPendingInspections()
+
+    @Transactional(readOnly = true)
     fun pendingInspections(): List<PendingInspectionDto> =
         spaceRepository.pendingInspections().map {
             val space = spaceRepository.findById(it.spaceId)

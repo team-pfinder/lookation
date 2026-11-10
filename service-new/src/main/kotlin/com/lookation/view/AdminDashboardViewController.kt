@@ -1,6 +1,5 @@
 package com.lookation.view
 
-import com.lookation.domain.ReportStatus
 import com.lookation.service.ReportService
 import com.lookation.service.SpaceService
 import com.lookation.service.WalletService
@@ -19,7 +18,7 @@ class AdminDashboardViewController(
 
     @GetMapping("/admin")
     fun dashboard(model: Model): String {
-        model.addAttribute("pendingInspections", spaceService.pendingInspections().size)
+        model.addAttribute("pendingInspections", spaceService.pendingInspectionCount())
         model.addAttribute("pendingReports", reportService.pendingCount())
         model.addAttribute("pendingCharges", walletService.pendingChargeCount())
         model.addAttribute("pendingWithdrawals", walletService.pendingWithdrawalCount())
