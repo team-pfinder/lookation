@@ -38,7 +38,8 @@ ADR 0005는 이용자·호스트·관리자를 `accounts` 1개 + 역할(`MEMBER`
 
 ## 정리
 
-- `accounts`의 `ADMIN` 역할·시드·테스트는 깨끗이 제거했다(구경로 호환 없음). 로컬 DB는 `docker compose down -v`로 갱신한다.
+- `accounts`의 `ADMIN` 역할·시드·테스트는 깨끗이 제거했다(구경로 호환 없음). 새 DB는 `docker compose down -v`로 갱신한다.
+- 기존 DB 업그레이드: V4가 `accounts`의 `ADMIN` 역할 계정을 같은 id로 `admin_users`에 복사해 감사 컬럼(`admin_id`)의 귀속을 보존하고, ADMIN 역할이 없던 비정상 `admin_id`는 NULL로 남긴다. 복사 후 identity 시퀀스를 최대 id 뒤로 옮긴다. 업그레이드 경로는 `AdminMigrationUpgradeTest`가 V3→V4로 검증한다.
 - `AccountRole`에서 `ADMIN`을 삭제했다. `ActorType.ADMIN`(예약 이력 감사)은 유지한다.
 - 관리자 시드 계정은 로컬 프로필에서 발급한다(`AdminSeeder`가 `admin_users`에 insert-if-absent).
 - 기존 DB에 남은 관리자 `accounts` 행은 삭제하지 않는다. 대신 `AuthService`가 `admin_users`에 있는 이메일의 일반 로그인·가입을 거부하므로, 구 관리자 계정으로 `/login` 토큰을 받을 수 없다. 관리자 접근은 `/admin/login`으로만 가능하다.

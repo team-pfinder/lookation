@@ -22,7 +22,30 @@ create table admin_refresh_tokens (
 
 create index admin_refresh_tokens_admin_idx on admin_refresh_tokens (admin_id);
 
+-- 기존 DB 업그레이드 경로: accounts의 ADMIN 역할 계정을 admin_users로 옮겨
+-- 감사 컬럼(admin_id)의 귀속을 보존한다. 신규 DB에서는 ADMIN 역할이 없어 아무 일도 하지 않는다.
+-- id를 그대로 유지해야 기존 admin_id가 새 FK를 통과한다.
+insert into admin_users (id, email, password_hash, name, nickname)
+overriding system value
+select a.id, a.email, a.password_hash, a.name, a.nickname
+from accounts a
+join account_roles r on r.account_id = a.id and r.role = 'ADMIN'
+on conflict do nothing;
+
+-- 명시 id를 넣었으므로 identity 시퀀스를 현재 최대값 뒤로 옮긴다.
+select setval(
+    pg_get_serial_sequence('admin_users', 'id'),
+    coalesce((select max(id) from admin_users), 0) + 1,
+    false
+);
+
 -- 관리자는 별도 테이블로 분리됐으므로 감사 컬럼의 FK는 admin_users로 옮긴다.
+-- ADMIN 역할이 없던 비정상 admin_id는 귀속을 포기하고 NULL로 보존해 마이그레이션이 막히지 않게 한다.
+update sanctions set admin_id = null where admin_id is not null and admin_id not in (select id from admin_users);
+update charges set admin_id = null where admin_id is not null and admin_id not in (select id from admin_users);
+update withdrawals set admin_id = null where admin_id is not null and admin_id not in (select id from admin_users);
+update inspections set admin_id = null where admin_id is not null and admin_id not in (select id from admin_users);
+update reports set admin_id = null where admin_id is not null and admin_id not in (select id from admin_users);
 alter table sanctions drop constraint if exists sanctions_admin_id_fkey;
 alter table sanctions add constraint sanctions_admin_id_fkey foreign key (admin_id) references admin_users (id);
 
