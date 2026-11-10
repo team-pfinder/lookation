@@ -75,3 +75,6 @@ service-old/test/build/
 /service-new/.kotlin/
 
 .security/
+
+# ---------- Node (관리자 스모크 스크립트) ----------
+node_modules/
