@@ -65,6 +65,9 @@ class AdminConsoleFlowTest {
     @Autowired
     private lateinit var dsl: org.jooq.DSLContext
 
+    @Autowired
+    private lateinit var accountRepository: com.lookation.repository.AccountRepository
+
     @BeforeEach
     fun seed() {
         InitializeService(steps).seed()
@@ -106,6 +109,27 @@ class AdminConsoleFlowTest {
 
         mockMvc.perform(get("/admin/accounts").cookie(*memberCookies))
             .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `구 관리자 accounts 행이 남아 있어도 일반 로그인은 거부된다`() {
+        accountRepository.insert(
+            email = ADMIN_EMAIL,
+            passwordHash = "legacy-hash",
+            name = "Legacy Admin",
+            nickname = "legacy-admin",
+        )
+
+        mockMvc.perform(
+            post("/login").with(csrf()).param("email", ADMIN_EMAIL).param("password", ADMIN_PASSWORD),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("이메일 또는 비밀번호가 올바르지 않습니다")))
+
+        // 관리자 전용 경로는 계속 동작한다.
+        mockMvc.perform(
+            post("/admin/login").with(csrf()).param("email", ADMIN_EMAIL).param("password", ADMIN_PASSWORD),
+        ).andExpect(status().isFound)
     }
 
     @Test

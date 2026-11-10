@@ -4,6 +4,7 @@ import com.lookation.domain.AccountRole
 import com.lookation.domain.AccountStatus
 import com.lookation.domain.VerificationPurpose
 import com.lookation.repository.AccountRepository
+import com.lookation.repository.AdminUserRepository
 import com.lookation.controller.form.LoginForm
 import com.lookation.controller.form.PasswordResetConfirmForm
 import com.lookation.controller.form.SignupForm
@@ -25,6 +26,7 @@ import java.time.OffsetDateTime
 @Service
 class AuthService(
     private val accountRepository: AccountRepository,
+    private val adminUserRepository: AdminUserRepository,
     private val verificationRepository: VerificationRepository,
     private val mailSender: MailSender,
     private val passwordEncoder: PasswordEncoder,
@@ -33,7 +35,7 @@ class AuthService(
 
     @Transactional
     fun signup(form: SignupForm): TokenPair {
-        if (accountRepository.existsByEmail(form.email)) {
+        if (accountRepository.existsByEmail(form.email) || adminUserRepository.existsByEmail(form.email)) {
             throw ConflictException("이미 가입된 이메일입니다")
         }
         consumeCode(form.email, VerificationPurpose.SIGNUP, form.code)
@@ -53,6 +55,10 @@ class AuthService(
 
     @Transactional
     fun login(form: LoginForm): TokenPair {
+        // 마이그레이션된 DB에 남아 있는 구 관리자 accounts 행으로 일반 로그인이 되지 않게 한다.
+        if (adminUserRepository.existsByEmail(form.email)) {
+            throw UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다")
+        }
         val account = accountRepository.findByEmail(form.email)
             ?: throw UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다")
         if (account.status != AccountStatus.ACTIVE) {
