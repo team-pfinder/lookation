@@ -133,6 +133,36 @@ class AdminConsoleFlowTest {
     }
 
     @Test
+    fun `잘못된 제재 종료 일시는 영구 제재로 저장되지 않는다`() {
+        val cookies = adminLogin()
+        val accountId = accountId(MEMBER_EMAIL)
+        val reason = "형식 오류 제재"
+
+        fun count(): Int = dsl.fetchCount(
+            com.lookation.jooq.tables.Sanctions.SANCTIONS,
+            com.lookation.jooq.tables.Sanctions.SANCTIONS.ACCOUNT_ID.eq(accountId)
+                .and(com.lookation.jooq.tables.Sanctions.SANCTIONS.REASON.eq(reason)),
+        )
+
+        val before = count()
+        mockMvc.perform(
+            post("/admin/accounts/$accountId/sanctions").with(csrf()).cookie(*cookies)
+                .param("level", "1").param("reason", reason).param("endsAt", "not-a-date"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("종료 일시 형식이 올바르지 않습니다")))
+        assertThat(count()).isEqualTo(before)
+
+        mockMvc.perform(
+            post("/admin/accounts/$accountId/sanctions").with(csrf()).cookie(*cookies)
+                .param("level", "1").param("reason", reason).param("endsAt", "2020-01-01T00:00"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("종료 일시는 현재 이후여야 합니다")))
+        assertThat(count()).isEqualTo(before)
+    }
+
+    @Test
     fun `관리자 토큰이 회원 쿠키에 섞여도 회원 화면을 쓸 수 없다`() {
         val adminCookies = adminLogin()
         val adminAccess = adminCookies.first { it.name == AdminAuthCookies.ACCESS_COOKIE }.value

@@ -3,6 +3,7 @@ package com.lookation.view
 import com.lookation.controller.form.ApplySanctionForm
 import com.lookation.domain.AccountRole
 import com.lookation.global.error.ApiException
+import com.lookation.global.error.BadRequestException
 import com.lookation.service.AdminAccountService
 import com.lookation.service.SanctionService
 import com.lookation.view.form.SanctionViewForm
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeParseException
 
 @Hidden
 @Controller
@@ -91,12 +94,16 @@ class AdminAccountViewController(
         return if (accountId != null) "redirect:/admin/accounts/$accountId" else "redirect:/admin/accounts"
     }
 
-    private fun parseEndsAt(raw: String?): java.time.OffsetDateTime? {
+    private fun parseEndsAt(raw: String?): OffsetDateTime? {
         if (raw.isNullOrBlank()) return null
-        return try {
+        val parsed = try {
             LocalDateTime.parse(raw).atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime()
-        } catch (_: Exception) {
-            null
+        } catch (_: DateTimeParseException) {
+            throw BadRequestException("종료 일시 형식이 올바르지 않습니다")
         }
+        if (!parsed.isAfter(OffsetDateTime.now())) {
+            throw BadRequestException("종료 일시는 현재 이후여야 합니다")
+        }
+        return parsed
     }
 }
