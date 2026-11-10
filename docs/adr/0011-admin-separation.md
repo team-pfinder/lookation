@@ -24,6 +24,8 @@ ADR 0005는 이용자·호스트·관리자를 `accounts` 1개 + 역할(`MEMBER`
 | 401·403 처리 | `ProblemDetail` JSON + `@PreAuthorize` 403 | 미인증은 `/admin/login?next=` 302, 인증됐으나 `ROLE_ADMIN`이 아니면 403 | `/login?next=` 302 |
 
 - 관리자 access 토큰의 `roles`는 항상 `["ADMIN"]`이고 subject는 `admin_users.id`다. `/api/v1/admin/**`의 `@PreAuthorize("hasRole('ADMIN')")`는 그대로 동작한다. 일반 `TokenService`는 `MEMBER`/`HOST`만 발급하므로 회원 토큰이 `ADMIN`을 갖지 않는다.
+- 관리자 쿠키는 `admin_access_token`/`admin_refresh_token`으로 회원 쿠키(`access_token`/`refresh_token`)와 이름을 분리한다. 한 브라우저에 두 세션이 있어도 서로의 토큰을 읽지 않는다. 또 회원 HTML 체인은 `MEMBER`/`HOST` 역할만 허용하므로, 관리자 토큰이 회원 쿠키에 섞여도 회원 화면에서 403이다. `admin_users.id`와 `accounts.id`가 같은 숫자여도 서로 다른 테이블의 주체로만 취급된다.
+- 관리자 체인의 bearer 리졸버는 관리자 쿠키를 우선하고, 없으면 회원 쿠키를 읽는다. 회원이 `/admin/**`에 닿으면 인증은 되지만 `ROLE_ADMIN`이 없어 403이다(로그인 화면으로 리다이렉트되지 않는다).
 - 관리자 체인도 투명 갱신(`AdminAccessTokenRefreshFilter`, 유예 10초)을 쓴다. refresh가 만료·폐기되면 쿠키를 지우고 `/admin/login?expired=1`로 보낸다.
 - `/admin/**` 비관리자는 403으로 거부한다(콘솔 URL 유출 방지). 비로그인은 `/admin/login`으로 보낸다.
 

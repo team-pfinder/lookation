@@ -17,7 +17,7 @@ import java.time.Instant
 class AdminAccessTokenRefreshFilter(
     private val adminTokenService: AdminTokenService,
     private val jwtDecoder: JwtDecoder,
-    private val authCookies: AuthCookies,
+    private val adminAuthCookies: AdminAuthCookies,
     private val htmlProperties: HtmlProperties,
 ) : OncePerRequestFilter() {
 
@@ -31,13 +31,13 @@ class AdminAccessTokenRefreshFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val accessToken = authCookies.readAccess(request)
+        val accessToken = adminAuthCookies.readAccess(request)
         if (accessToken != null && !isExpiringSoon(accessToken)) {
             filterChain.doFilter(request, response)
             return
         }
 
-        val refreshToken = authCookies.readRefresh(request)
+        val refreshToken = adminAuthCookies.readRefresh(request)
         if (refreshToken == null) {
             filterChain.doFilter(request, response)
             return
@@ -46,13 +46,13 @@ class AdminAccessTokenRefreshFilter(
         val pair = try {
             adminTokenService.rotate(refreshToken, htmlProperties.reuseGrace)
         } catch (exception: UnauthorizedException) {
-            authCookies.clear(response)
+            adminAuthCookies.clear(response)
             response.sendRedirect("/admin/login?expired=1")
             return
         }
 
-        authCookies.write(response, pair.accessToken, pair.refreshToken)
-        request.setAttribute(AuthCookies.REFRESHED_ACCESS_ATTRIBUTE, pair.accessToken)
+        adminAuthCookies.write(response, pair.accessToken, pair.refreshToken)
+        request.setAttribute(AdminAuthCookies.REFRESHED_ACCESS_ATTRIBUTE, pair.accessToken)
         filterChain.doFilter(request, response)
     }
 

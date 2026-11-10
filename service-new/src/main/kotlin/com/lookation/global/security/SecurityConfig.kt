@@ -32,7 +32,9 @@ import org.springframework.security.web.savedrequest.NullRequestCache
 @EnableConfigurationProperties(HtmlProperties::class)
 class SecurityConfig(
     private val authCookies: AuthCookies,
+    private val adminAuthCookies: AdminAuthCookies,
     private val cookieBearerTokenResolver: CookieBearerTokenResolver,
+    private val adminCookieBearerTokenResolver: AdminCookieBearerTokenResolver,
     private val tokenService: TokenService,
     private val adminTokenService: AdminTokenService,
     private val adminAccessDeniedHandler: AdminAccessDeniedHandler,
@@ -107,11 +109,11 @@ class SecurityConfig(
                 accessDeniedHandler = adminAccessDeniedHandler
             }
             oauth2ResourceServer {
-                bearerTokenResolver = cookieBearerTokenResolver
+                bearerTokenResolver = adminCookieBearerTokenResolver
                 jwt { jwtAuthenticationConverter = claimRolesConverter() }
             }
             addFilterBefore<BearerTokenAuthenticationFilter>(
-                AdminAccessTokenRefreshFilter(adminTokenService, jwtDecoder, authCookies, htmlProperties),
+                AdminAccessTokenRefreshFilter(adminTokenService, jwtDecoder, adminAuthCookies, htmlProperties),
             )
         }
         return http.build()
@@ -148,7 +150,9 @@ class SecurityConfig(
                 authorize("/uploads/**", permitAll)
                 authorize("/favicon.ico", permitAll)
                 authorize("/error", permitAll)
-                authorize(anyRequest, authenticated)
+                // 회원 화면은 MEMBER/HOST만 쓴다. 관리자 토큰이 회원 쿠키에 섞여 들어와도
+                // 관리자 권한으로 회원 데이터를 조작하지 못하게 한다.
+                authorize(anyRequest, hasAnyRole("MEMBER", "HOST"))
             }
             exceptionHandling { authenticationEntryPoint = LoginRedirectEntryPoint() }
             oauth2ResourceServer {

@@ -2,7 +2,7 @@ package com.lookation.view
 
 import com.lookation.controller.form.LoginForm
 import com.lookation.global.error.ApiException
-import com.lookation.global.security.AuthCookies
+import com.lookation.global.security.AdminAuthCookies
 import com.lookation.service.AdminAuthService
 import com.lookation.service.AdminTokenService
 import com.lookation.view.form.LoginViewForm
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam
 class AdminHtmlAuthController(
     private val adminAuthService: AdminAuthService,
     private val adminTokenService: AdminTokenService,
-    private val authCookies: AuthCookies,
+    private val adminAuthCookies: AdminAuthCookies,
 ) {
 
     @GetMapping("/admin/login")
@@ -58,7 +58,7 @@ class AdminHtmlAuthController(
         }
         return try {
             val pair = adminAuthService.login(LoginForm(email = form.email, password = form.password))
-            authCookies.write(response, pair.accessToken, pair.refreshToken)
+            adminAuthCookies.write(response, pair.accessToken, pair.refreshToken)
             "redirect:${safeAdminNext(form.next)}"
         } catch (exception: ApiException) {
             model.addAttribute("error", exception.message)
@@ -69,8 +69,8 @@ class AdminHtmlAuthController(
 
     @PostMapping("/admin/logout")
     fun logout(request: HttpServletRequest, response: HttpServletResponse): String {
-        authCookies.readRefresh(request)?.let { adminTokenService.revokeFamily(it) }
-        authCookies.clear(response)
+        adminAuthCookies.readRefresh(request)?.let { adminTokenService.revokeFamily(it) }
+        adminAuthCookies.clear(response)
         return "redirect:/admin/login?loggedOut=1"
     }
 

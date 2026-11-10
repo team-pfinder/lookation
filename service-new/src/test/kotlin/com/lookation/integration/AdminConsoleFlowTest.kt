@@ -1,5 +1,7 @@
 package com.lookation.integration
 
+import com.lookation.global.security.AdminAuthCookies
+import com.lookation.global.security.AuthCookies
 import com.lookation.global.seed.InitializeService
 import com.lookation.global.seed.SeedStep
 import jakarta.servlet.http.Cookie
@@ -103,6 +105,24 @@ class AdminConsoleFlowTest {
             .andExpect(content().string(org.hamcrest.Matchers.containsString("접근 권한이 없습니다")))
 
         mockMvc.perform(get("/admin/accounts").cookie(*memberCookies))
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `관리자 토큰이 회원 쿠키에 섞여도 회원 화면을 쓸 수 없다`() {
+        val adminCookies = adminLogin()
+        val adminAccess = adminCookies.first { it.name == AdminAuthCookies.ACCESS_COOKIE }.value
+
+        mockMvc.perform(get("/mypage/reservations").cookie(Cookie(AuthCookies.ACCESS_COOKIE, adminAccess)))
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `회원 토큰이 관리자 쿠키에 섞여도 콘솔에 들어갈 수 없다`() {
+        val memberCookies = memberLogin()
+        val memberAccess = memberCookies.first { it.name == AuthCookies.ACCESS_COOKIE }.value
+
+        mockMvc.perform(get("/admin").cookie(Cookie(AdminAuthCookies.ACCESS_COOKIE, memberAccess)))
             .andExpect(status().isForbidden)
     }
 
@@ -333,8 +353,8 @@ class AdminConsoleFlowTest {
             .andExpect(status().isFound)
             .andExpect(header().string("Location", "/admin"))
             .andReturn()
-        val access = result.response.getCookie("access_token")
-        val refresh = result.response.getCookie("refresh_token")
+        val access = result.response.getCookie(AdminAuthCookies.ACCESS_COOKIE)
+        val refresh = result.response.getCookie(AdminAuthCookies.REFRESH_COOKIE)
         assertThat(access).describedAs("admin access cookie").isNotNull
         assertThat(refresh).describedAs("admin refresh cookie").isNotNull
         return arrayOf(access!!, refresh!!)
