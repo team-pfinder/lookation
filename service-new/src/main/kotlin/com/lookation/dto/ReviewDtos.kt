@@ -32,4 +32,7 @@ data class ReviewDto(
 
     @field:Schema(description = "작성 일시입니다.", example = "2026-11-20T18:00:00+09:00")
     val createdAt: OffsetDateTime,
+
+    @field:Schema(description = "블라인드 일시. 블라인드되지 않았으면 null입니다.", example = "2026-11-21T09:00:00+09:00")
+    val blindedAt: OffsetDateTime? = null,
 )

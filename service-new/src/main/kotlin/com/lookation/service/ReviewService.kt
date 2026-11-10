@@ -153,6 +153,7 @@ class ReviewService(
         reply = reply,
         images = images.map { "/uploads/$it" },
         createdAt = createdAt,
+        blindedAt = blindedAt,
     )
 
     companion object {

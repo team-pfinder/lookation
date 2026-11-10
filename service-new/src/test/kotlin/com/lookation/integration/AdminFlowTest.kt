@@ -2,6 +2,7 @@ package com.lookation.integration
 
 import com.lookation.jooq.tables.Accounts.ACCOUNTS
 import com.lookation.jooq.tables.Spaces.SPACES
+import com.lookation.jooq.tables.Withdrawals.WITHDRAWALS
 import com.lookation.repository.AdminUserRepository
 import com.lookation.service.AdminTokenService
 import org.assertj.core.api.Assertions.assertThat
@@ -87,6 +88,69 @@ class AdminFlowTest {
         assertThat(
             post("/api/v1/wallet/charges", mapOf("amount" to 10_000, "depositorName" to "홍길동"), member.access).status.value(),
         ).isEqualTo(HttpStatus.OK.value())
+    }
+
+    @Test
+    fun `admin lists accounts with role filter and reads a detail`() {
+        val member = signup()
+        val adminToken = adminToken()
+
+        val page = get("/api/v1/admin/accounts?role=MEMBER", adminToken).body!!
+        val items = page["items"] as List<*>
+        assertThat(items.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).contains(member.id)
+
+        val detail = get("/api/v1/admin/accounts/${member.id}", adminToken)
+        assertThat(detail.status.value()).isEqualTo(HttpStatus.OK.value())
+        assertThat((detail.body!!["id"] as Number).toLong()).isEqualTo(member.id)
+    }
+
+    @Test
+    fun `admin lists charges and withdrawals`() {
+        val member = signup()
+        val adminToken = adminToken()
+
+        val charge = post(
+            "/api/v1/wallet/charges",
+            mapOf("amount" to 10_000, "depositorName" to "홍길동"),
+            member.access,
+        )
+        val chargeId = (charge.body!!["id"] as Number).toLong()
+        val charges = get("/api/v1/admin/charges?status=REQUESTED", adminToken).body!!["items"] as List<*>
+        assertThat(charges.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).contains(chargeId)
+
+        val withdrawalId = dsl.insertInto(WITHDRAWALS)
+            .set(WITHDRAWALS.ACCOUNT_ID, member.id)
+            .set(WITHDRAWALS.AMOUNT, 5_000)
+            .set(WITHDRAWALS.BANK_NAME, "테스트은행")
+            .set(WITHDRAWALS.ACCOUNT_NUMBER_ENC, ByteArray(1) { 1 })
+            .set(WITHDRAWALS.ACCOUNT_HOLDER_ENC, ByteArray(1) { 1 })
+            .returningResult(WITHDRAWALS.ID)
+            .fetchOne()!!
+            .value1()
+        val withdrawals = get("/api/v1/admin/withdrawals?status=REQUESTED", adminToken).body!!["items"] as List<*>
+        assertThat(withdrawals.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).contains(withdrawalId)
+    }
+
+    @Test
+    fun `admin lists and deletes qnas`() {
+        val member = signup()
+        val spaceId = publishedSpace(account("host"))
+        val adminToken = adminToken()
+
+        val qna = post(
+            "/api/v1/spaces/$spaceId/qnas",
+            mapOf("title" to "관리자 목록 테스트", "content" to "내용"),
+            member.access,
+        )
+        val qnaId = (qna.body!!["id"] as Number).toLong()
+
+        val listed = get("/api/v1/admin/qnas", adminToken).body!!["items"] as List<*>
+        assertThat(listed.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).contains(qnaId)
+
+        assertThat(delete("/api/v1/admin/qnas/$qnaId", adminToken).status.value())
+            .isEqualTo(HttpStatus.NO_CONTENT.value())
+        val after = get("/api/v1/admin/qnas", adminToken).body!!["items"] as List<*>
+        assertThat(after.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).doesNotContain(qnaId)
     }
 
     @Test

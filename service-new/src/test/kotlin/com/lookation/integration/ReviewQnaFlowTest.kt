@@ -87,9 +87,14 @@ class ReviewQnaFlowTest {
             .isEqualTo(HttpStatus.CONFLICT.value())
 
         val adminId = account("admin")
-        assertThat(postMap("/api/v1/admin/reviews/$reviewId/blind", emptyMap(), tokenFor(adminId, "ADMIN")).status.value())
+        val adminToken = tokenFor(adminId, "ADMIN")
+        assertThat(postMap("/api/v1/admin/reviews/$reviewId/blind", emptyMap(), adminToken).status.value())
             .isEqualTo(HttpStatus.OK.value())
         assertThat(getMap("/api/v1/spaces/$spaceId/reviews", null).body!!["items"] as List<*>).isEmpty()
+
+        val adminReviews = getMap("/api/v1/admin/reviews", adminToken).body!!["items"] as List<*>
+        val blinded = adminReviews.map { it as Map<*, *> }.first { (it["id"] as Number).toLong() == reviewId }
+        assertThat(blinded["blindedAt"]).isNotNull
     }
 
     @Test

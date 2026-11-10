@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import com.lookation.dto.WithdrawalDto
 import com.lookation.dto.ChargeDto
+import com.lookation.dto.PagedDto
 import com.lookation.controller.form.WalletDecisionForm
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(
     name = "관리자 - 입출금 심사",
@@ -26,6 +29,34 @@ import com.lookation.controller.form.WalletDecisionForm
 @RequestMapping("/api/v1/admin")
 @PreAuthorize("hasRole('ADMIN')")
 class AdminWalletController(private val walletService: WalletService) {
+
+    @Operation(
+        summary = "충전 신청 목록",
+        description = "전체 회원의 충전 신청을 최신순으로 커서 페이징해 반환합니다. `status`를 주면 `REQUESTED`, `APPROVED`, `REJECTED` 중 해당 상태만 필터링합니다. `limit`이 1~100을 벗어나면 400입니다.",
+    )
+    @GetMapping("/charges")
+    fun charges(
+        @Parameter(description = "충전 상태 필터", example = "REQUESTED")
+        @RequestParam(required = false) status: String?,
+        @Parameter(description = "이전 페이지 마지막 신청 ID", example = "42")
+        @RequestParam(required = false) cursor: Long?,
+        @Parameter(description = "페이지 크기 (1~100)", example = "20")
+        @RequestParam(defaultValue = "20") limit: Int,
+    ): PagedDto<ChargeDto> = walletService.chargesByStatus(status, cursor, limit)
+
+    @Operation(
+        summary = "출금 신청 목록",
+        description = "전체 호스트의 출금 신청을 최신순으로 커서 페이징해 반환합니다. `status`를 주면 `REQUESTED`, `APPROVED`, `PAID`, `REJECTED` 중 해당 상태만 필터링합니다. `limit`이 1~100을 벗어나면 400입니다.",
+    )
+    @GetMapping("/withdrawals")
+    fun withdrawals(
+        @Parameter(description = "출금 상태 필터", example = "REQUESTED")
+        @RequestParam(required = false) status: String?,
+        @Parameter(description = "이전 페이지 마지막 신청 ID", example = "42")
+        @RequestParam(required = false) cursor: Long?,
+        @Parameter(description = "페이지 크기 (1~100)", example = "20")
+        @RequestParam(defaultValue = "20") limit: Int,
+    ): PagedDto<WithdrawalDto> = walletService.withdrawalsByStatus(status, cursor, limit)
 
     @Operation(
         summary = "충전 신청 승인·거절",

@@ -133,6 +133,7 @@ jOOQ OSS 파서가 CHECK 제약을 읽지 못하므로 구조(V2)와 제약(V3)�
 | POST | `/api/v1/spaces/{id}/images` | HOST |
 | GET | `/api/v1/admin/inspections` | ADMIN |
 | POST | `/api/v1/admin/inspections/{spaceId}/decision` | ADMIN |
+| GET | `/api/v1/admin/accounts`, `/api/v1/admin/accounts/{id}` | ADMIN (역할 필터·커서 페이징) |
 | GET/PUT | `/api/v1/spaces/{id}/prices` | 공개 조회 / HOST 수정 |
 | GET | `/api/v1/hosts/reservations` | HOST (CONFIRMED 이후 예약자 연락처 노출) |
 | GET | `/api/v1/spaces?type=&keyword=&sido=&sigungu=&guests=&minPrice=&maxPrice=&from=&to=&sort=&cursor=&limit=` | 공개 |
@@ -142,13 +143,16 @@ jOOQ OSS 파서가 CHECK 제약을 읽지 못하므로 구조(V2)와 제약(V3)�
 | POST | `/api/v1/reservations/{id}/cancel` | 당사자 |
 | POST/GET | `/api/v1/wallet/charges` | 인증 |
 | POST/GET | `/api/v1/withdrawals` | HOST |
+| GET | `/api/v1/admin/charges`, `/api/v1/admin/withdrawals` | ADMIN (상태 필터·커서 페이징) |
 | POST | `/api/v1/admin/charges/{id}/decision`, `/api/v1/admin/withdrawals/{id}/decision` | ADMIN |
 | GET | `/api/v1/spaces/{id}/reviews` | 공개 |
 | POST | `/api/v1/reviews`, `/api/v1/reviews/{id}/images` | 인증 (COMPLETED 예약 1건당 1개, 이미지 5장) |
 | POST | `/api/v1/reviews/{id}/reply` | HOST |
+| GET | `/api/v1/admin/reviews` | ADMIN (블라인드 포함) |
 | POST | `/api/v1/admin/reviews/{id}/blind` | ADMIN |
 | GET/POST | `/api/v1/spaces/{id}/qnas`, `/api/v1/qnas/{id}` | 공개 조회 / 인증 질문 |
 | POST | `/api/v1/qnas/{id}/answer` | HOST |
+| GET/DELETE | `/api/v1/admin/qnas`, `/api/v1/admin/qnas/{id}` | ADMIN |
 | DELETE | `/api/v1/qnas/{id}` | 작성자 (답변 전만) |
 | GET | `/api/v1/notices`, `/api/v1/helps` | 공개 |
 | POST/PUT/DELETE | `/api/v1/admin/notices`, `/api/v1/admin/helps` | ADMIN |
