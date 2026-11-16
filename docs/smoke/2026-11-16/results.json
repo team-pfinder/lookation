@@ -1,0 +1,230 @@
+{
+  "base": "http://localhost:8080",
+  "results": [
+    {
+      "path": "/admin/login",
+      "slug": "login",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin",
+      "slug": "dashboard",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/accounts",
+      "slug": "accounts",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/accounts/6",
+      "slug": "accounts-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/reports",
+      "slug": "reports",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/reports/3",
+      "slug": "reports-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/inspections",
+      "slug": "inspections",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/inspections/3",
+      "slug": "inspections-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/charges",
+      "slug": "charges",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/charges/4",
+      "slug": "charges-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/withdrawals",
+      "slug": "withdrawals",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/withdrawals/4",
+      "slug": "withdrawals-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/notices",
+      "slug": "notices",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/notices/2",
+      "slug": "notices-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/notices/2/edit",
+      "slug": "notices-edit",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/helps",
+      "slug": "helps",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/helps/2",
+      "slug": "helps-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/helps/2/edit",
+      "slug": "helps-edit",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/qnas",
+      "slug": "qnas",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/qnas/2",
+      "slug": "qnas-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/reviews",
+      "slug": "reviews",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/reviews/1",
+      "slug": "reviews-detail",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/notices/new",
+      "slug": "notice-new",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/helps/new",
+      "slug": "help-new",
+      "status": 200,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": false
+    },
+    {
+      "path": "/admin/notices/5",
+      "slug": "notice-created",
+      "status": "created"
+    },
+    {
+      "path": "/admin/notices/5",
+      "slug": "notice-updated",
+      "status": "updated"
+    },
+    {
+      "path": "/admin/notices/5",
+      "slug": "notice-deleted",
+      "status": "deleted"
+    },
+    {
+      "path": "/admin/helps/3",
+      "slug": "help-created",
+      "status": "created"
+    },
+    {
+      "path": "/admin/helps/3",
+      "slug": "help-updated",
+      "status": "updated"
+    },
+    {
+      "path": "/admin/helps/3",
+      "slug": "help-deleted",
+      "status": "deleted"
+    }
+  ],
+  "consoleErrors": [],
+  "badStatus": [],
+  "overflowPages": []
+}

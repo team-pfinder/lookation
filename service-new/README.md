@@ -85,10 +85,10 @@ npm install --no-save playwright          # 최초 1회
 node scripts/admin-smoke.mjs              # 앱이 떠 있는 상태에서 실행
 ```
 
-- 실제 Chrome(설치된 Chrome 사용)으로 `/admin/login`에 로그인하고 관리자 콘솔 11개 화면을 1440×900으로 방문한다.
-- 화면마다 HTTP 상태·가로 오버플로(`scrollWidth > innerWidth`)·콘솔 오류를 수집하고 스크린샷을 `build/admin-smoke/`에 남긴다.
-- 공지 등록/삭제 POST로 브라우저 CSRF 폼 흐름도 확인한다.
-- 결과 예시와 2026-11-10 실행 기록은 [`../docs/smoke/admin-1440-2026-11-10.md`](../docs/smoke/admin-1440-2026-11-10.md)에 있다.
+- 실제 Chrome(설치된 Chrome 사용)으로 `/admin/login`에 로그인하고 관리자 콘솔의 목록·상세·등록/수정 화면을 1440×900으로 방문한다.
+- 화면마다 HTTP 상태·가로 오버플로(`scrollWidth > innerWidth`)·콘솔 오류를 수집하고 스크린샷과 `results.json`을 `build/admin-smoke/`에 남긴다.
+- 공지·도움말 등록/수정/삭제 POST로 브라우저 CSRF 폼 흐름도 확인한다.
+- 결과 예시와 실행 기록은 [`../docs/smoke/admin-1440-2026-11-16.md`](../docs/smoke/admin-1440-2026-11-16.md)(전수), [`../docs/smoke/admin-1440-2026-11-10.md`](../docs/smoke/admin-1440-2026-11-10.md)(최초)에 있다.
 - 예약 폼은 날짜와 가격 규칙 슬롯을 선택한다. 서버가 KST 기준 `startAt`/`endAt`을 계산하고 `ReservationService`가 가격·점유를 다시 검증한다.
 - 공간 상세의 예약 불가 표시는 `GET /api/v1/spaces/{id}/availability`와 같은 점유 상태 4종(`PENDING_APPROVAL`, `PENDING_PAYMENT`, `CONFIRMED`, `COMPLETED`)을 쓴다.
 - 비공개·삭제 공간은 404, 타인 예약 접근은 403을 HTML 오류 화면으로 렌더한다.
