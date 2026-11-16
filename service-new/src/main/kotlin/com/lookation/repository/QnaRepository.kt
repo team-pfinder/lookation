@@ -67,7 +67,8 @@ class QnaRepository(private val dsl: DSLContext) {
         return baseQuery().where(condition).orderBy(QNAS.ID.desc()).limit(limit).fetch().map { it.toRow() }
     }
 
-    fun deleteAny(id: Long): Int {
+    /** 관리자 강제 삭제. 답변 여부와 관계없이 질문과 답변을 함께 지운다. */
+    fun deleteForAdmin(id: Long): Int {
         dsl.deleteFrom(QNA_REPLIES).where(QNA_REPLIES.QNA_ID.eq(id)).execute()
         return dsl.deleteFrom(QNAS).where(QNAS.ID.eq(id)).execute()
     }

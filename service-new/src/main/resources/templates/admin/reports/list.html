@@ -7,7 +7,7 @@
         <label class="mr-2" for="status">상태</label>
         <select id="status" name="status" class="form-control mr-2">
             <option value="">전체</option>
-            <option th:each="s : ${statuses}" th:value="${s}" th:selected="${statusFilter == s}" th:text="${s}"></option>
+            <option th:each="s : ${statuses}" th:value="${s}" th:selected="${statusFilter == s}" th:text="${@fmt.reportStatus(s)}"></option>
         </select>
         <label class="mr-2" for="targetType">대상</label>
         <select id="targetType" name="targetType" class="form-control mr-2">
@@ -21,7 +21,7 @@
         <tbody>
         <tr th:each="r : ${page.items}">
             <td th:text="${r.id}"></td><td th:text="${r.reporterId}"></td><td th:text="${r.targetType} + ' #' + ${r.targetId}"></td>
-            <td th:text="${r.reason}"></td><td th:text="${r.status}"></td><td th:text="${r.createdAt}"></td>
+            <td th:text="${r.reason}"></td><td th:text="${@fmt.reportStatus(r.status)}"></td><td th:text="${@fmt.dateTime(r.createdAt)}"></td>
             <td><a class="btn btn-sm btn-primary" th:href="@{/admin/reports/{id}(id=${r.id})}">상세</a></td>
         </tr>
         <tr th:if="${page.items.isEmpty()}"><td colspan="7" class="text-center">조회 결과가 없습니다.</td></tr>

@@ -1,21 +1,24 @@
 package com.lookation.service
 
 import com.lookation.controller.form.CreateReportForm
+import com.lookation.domain.ReportStatus
+import com.lookation.domain.ReportTarget
+import com.lookation.domain.SpaceType
 import com.lookation.dto.PagedDto
+import com.lookation.dto.ReportDetailDto
 import com.lookation.dto.ReportDto
+import com.lookation.dto.ReportReporterDto
+import com.lookation.dto.ReportTargetSummaryDto
 import com.lookation.global.error.BadRequestException
 import com.lookation.global.error.ConflictException
 import com.lookation.global.error.NotFoundException
 import com.lookation.repository.AccountRepository
 import com.lookation.repository.QnaRepository
-import com.lookation.domain.ReportStatus
-import com.lookation.domain.ReportTarget
 import com.lookation.repository.ReportRepository
 import com.lookation.repository.ReportRow
 import com.lookation.repository.ReservationRepository
 import com.lookation.repository.ReviewRepository
 import com.lookation.repository.SpaceRepository
-import com.lookation.service.SanctionService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -75,8 +78,21 @@ class ReportService(
     fun pendingCount(): Long = reportRepository.countByStatus(ReportStatus.RECEIVED)
 
     @Transactional(readOnly = true)
-    fun get(id: Long): com.lookation.dto.ReportDto =
+    fun get(id: Long): ReportDto =
         (reportRepository.findById(id) ?: throw NotFoundException("신고를 찾을 수 없습니다")).toResponse()
+
+    @Transactional(readOnly = true)
+    fun detail(id: Long): ReportDetailDto {
+        val report = reportRepository.findById(id) ?: throw NotFoundException("신고를 찾을 수 없습니다")
+        val reporter = accountRepository.findById(report.reporterId)?.let {
+            ReportReporterDto(id = it.id, email = it.email, name = it.name, nickname = it.nickname)
+        }
+        return ReportDetailDto(
+            report = report.toResponse(),
+            reporter = reporter,
+            target = targetSummary(report.targetType, report.targetId),
+        )
+    }
 
     @Transactional
     fun decide(adminId: Long, reportId: Long, accepted: Boolean): ReportDto {
@@ -93,6 +109,72 @@ class ReportService(
         ReportTarget.REVIEW -> reviewRepository.findById(id) != null
         ReportTarget.QNA -> qnaRepository.findById(id) != null
         ReportTarget.ACCOUNT -> accountRepository.findById(id) != null
+    }
+
+    private fun targetSummary(type: ReportTarget, id: Long): ReportTargetSummaryDto? = when (type) {
+        ReportTarget.SPACE -> spaceRepository.findById(id)?.let {
+            ReportTargetSummaryDto(
+                targetType = type,
+                targetId = id,
+                name = it.name,
+                status = it.status.name,
+                hostId = it.hostId,
+                address = it.address,
+                spaceType = SpaceType.valueOf(it.spaceType),
+                minCapacity = it.minCapacity,
+                maxCapacity = it.maxCapacity,
+                description = it.description,
+            )
+        }
+        ReportTarget.RESERVATION -> reservationRepository.findById(id)?.let {
+            ReportTargetSummaryDto(
+                targetType = type,
+                targetId = id,
+                status = it.status.name,
+                spaceId = it.spaceId,
+                memberId = it.memberId,
+                hostId = it.hostId,
+                startAt = it.startAt,
+                endAt = it.endAt,
+                price = it.price,
+                guestCount = it.guestCount,
+            )
+        }
+        ReportTarget.REVIEW -> reviewRepository.findById(id)?.let {
+            ReportTargetSummaryDto(
+                targetType = type,
+                targetId = id,
+                spaceId = it.spaceId,
+                blindedAt = it.blindedAt,
+                author = it.nickname,
+                rating = it.rating,
+                content = it.content,
+                reply = it.reply,
+            )
+        }
+        ReportTarget.QNA -> qnaRepository.findById(id)?.let {
+            ReportTargetSummaryDto(
+                targetType = type,
+                targetId = id,
+                title = it.title,
+                status = it.status.name,
+                author = it.nickname,
+                spaceId = it.spaceId,
+                content = it.content,
+                reply = it.reply,
+            )
+        }
+        ReportTarget.ACCOUNT -> accountRepository.findById(id)?.let {
+            ReportTargetSummaryDto(
+                targetType = type,
+                targetId = id,
+                email = it.email,
+                name = it.name,
+                nickname = it.nickname,
+                roles = accountRepository.roles(id),
+                status = it.status.name,
+            )
+        }
     }
 
     private fun ReportRow.toResponse() = ReportDto(

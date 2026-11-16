@@ -40,7 +40,7 @@ class AdminReportViewController(
         @PathVariable id: Long,
         model: Model,
     ): String {
-        model.addAttribute("report", reportService.get(id))
+        addDetail(model, id)
         return "admin/reports/detail"
     }
 
@@ -55,10 +55,16 @@ class AdminReportViewController(
             reportService.decide(jwt.requireAdminId(), id, accepted)
             "redirect:/admin/reports/$id"
         } catch (exception: ApiException) {
-            model.addAttribute("report", reportService.get(id))
+            addDetail(model, id)
             model.addAttribute("error", exception.message)
             model.addAttribute("renderedErrorLocally", true)
             "admin/reports/detail"
         }
+    }
+
+    private fun addDetail(model: Model, id: Long) {
+        val detail = reportService.detail(id)
+        model.addAttribute("report", detail.report)
+        model.addAttribute("detail", detail)
     }
 }

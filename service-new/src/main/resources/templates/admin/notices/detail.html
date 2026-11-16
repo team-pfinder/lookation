@@ -6,7 +6,9 @@
     <div class="card shadow"><div class="card-body">
         <dl class="row"><dt class="col-sm-2">제목</dt><dd class="col-sm-10" th:text="${notice.title}"></dd>
         <dt class="col-sm-2">본문</dt><dd class="col-sm-10" th:text="${notice.content}"></dd>
-        <dt class="col-sm-2">중요</dt><dd class="col-sm-10" th:text="${notice.important}"></dd></dl>
+        <dt class="col-sm-2">중요</dt><dd class="col-sm-10" th:text="${notice.important ? '중요' : '-'}"></dd>
+        <dt class="col-sm-2">작성 일시</dt><dd class="col-sm-10" th:text="${@fmt.dateTime(notice.createdAt)}"></dd>
+        <dt class="col-sm-2">수정 일시</dt><dd class="col-sm-10" th:text="${@fmt.dateTime(notice.updatedAt)}"></dd></dl>
         <a class="btn btn-primary" th:href="@{/admin/notices/{id}/edit(id=${notice.id})}">수정</a>
         <form class="d-inline" th:action="@{/admin/notices/{id}/delete(id=${notice.id})}" method="post"><button class="btn btn-danger" type="submit">삭제</button></form>
     </div></div>

@@ -6,7 +6,7 @@
     <div class="card shadow"><div class="card-body"><table class="table table-bordered">
         <thead><tr><th>ID</th><th>제목</th><th>중요</th><th>일시</th><th></th></tr></thead>
         <tbody><tr th:each="n : ${page.items}">
-            <td th:text="${n.id}"></td><td><a th:href="@{/admin/notices/{id}(id=${n.id})}" th:text="${n.title}"></a></td><td th:text="${n.important}"></td><td th:text="${n.createdAt}"></td>
+            <td th:text="${n.id}"></td><td><a th:href="@{/admin/notices/{id}(id=${n.id})}" th:text="${n.title}"></a></td><td th:text="${n.important ? '중요' : '-'}"></td><td th:text="${@fmt.dateTime(n.createdAt)}"></td>
             <td><a class="btn btn-sm btn-primary" th:href="@{/admin/notices/{id}(id=${n.id})}">상세</a></td>
         </tr><tr th:if="${page.items.isEmpty()}"><td colspan="5" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
         <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/notices(cursor=${page.nextCursor})}">다음</a></div>

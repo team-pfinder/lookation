@@ -9,18 +9,21 @@
             <dt class="col-sm-2">ID</dt><dd class="col-sm-10" th:text="${space.id}"></dd>
             <dt class="col-sm-2">공간명</dt><dd class="col-sm-10" th:text="${space.name}"></dd>
             <dt class="col-sm-2">주소</dt><dd class="col-sm-10" th:text="${space.address}"></dd>
-            <dt class="col-sm-2">유형</dt><dd class="col-sm-10" th:text="${space.spaceType}"></dd>
-            <dt class="col-sm-2">인원</dt><dd class="col-sm-10" th:text="${space.minCapacity} + ' - ' + ${space.maxCapacity}"></dd>
-            <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${space.status}"></dd>
+            <dt class="col-sm-2">유형</dt><dd class="col-sm-10" th:text="${@fmt.spaceType(space.spaceType)}"></dd>
+            <dt class="col-sm-2">인원</dt><dd class="col-sm-10" th:text="|${space.minCapacity} - ${space.maxCapacity}명|"></dd>
+            <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${@fmt.spaceStatus(space.status)}"></dd>
             <dt class="col-sm-2">소개</dt><dd class="col-sm-10" th:text="${space.description}"></dd>
         </dl>
-        <form class="d-inline" th:action="@{/admin/inspections/{id}/decision(id=${space.id})}" method="post">
-            <input type="hidden" name="approved" value="true"><button class="btn btn-success" type="submit">승인</button>
-        </form>
-        <form class="d-inline mt-3" th:action="@{/admin/inspections/{id}/decision(id=${space.id})}" method="post">
-            <input type="hidden" name="approved" value="false">
-            <input class="form-control d-inline-block w-auto" name="reason" placeholder="반려 사유" required>
-            <button class="btn btn-danger" type="submit">반려</button>
-        </form>
+        <th:block th:if="${space.status.name() == 'PENDING_INSPECTION'}">
+            <form class="d-inline" th:action="@{/admin/inspections/{id}/decision(id=${space.id})}" method="post">
+                <input type="hidden" name="approved" value="true"><button class="btn btn-success" type="submit">승인</button>
+            </form>
+            <form class="d-inline mt-3" th:action="@{/admin/inspections/{id}/decision(id=${space.id})}" method="post">
+                <input type="hidden" name="approved" value="false">
+                <input class="form-control d-inline-block w-auto" name="reason" placeholder="반려 사유" required>
+                <button class="btn btn-danger" type="submit">반려</button>
+            </form>
+        </th:block>
+        <div class="alert alert-info mb-0" th:unless="${space.status.name() == 'PENDING_INSPECTION'}">이미 처리된 검수입니다</div>
     </div></div>
 </section></body></html>

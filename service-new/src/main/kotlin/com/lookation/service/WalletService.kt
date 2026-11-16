@@ -6,14 +6,17 @@ import com.lookation.global.error.NotFoundException
 import com.lookation.repository.HostProfileRepository
 import com.lookation.controller.form.ChargeRequestForm
 import com.lookation.dto.ChargeDto
+import com.lookation.dto.PagedDto
 import com.lookation.controller.form.WithdrawalRequestForm
 import com.lookation.dto.WithdrawalDto
 import com.lookation.domain.ChargeStatus
 import com.lookation.domain.WalletEntryType
 import com.lookation.domain.WithdrawalStatus
 import com.lookation.repository.ChargeRepository
+import com.lookation.repository.ChargeRow
 import com.lookation.repository.WalletRepository
 import com.lookation.repository.WithdrawalRepository
+import com.lookation.repository.WithdrawalRow
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,7 +26,7 @@ class WalletService(
     private val chargeRepository: ChargeRepository,
     private val withdrawalRepository: WithdrawalRepository,
     private val hostProfileRepository: HostProfileRepository,
-    private val sanctionService: com.lookation.service.SanctionService,
+    private val sanctionService: SanctionService,
 ) {
 
     @Transactional
@@ -99,7 +102,7 @@ class WalletService(
     }
 
     @Transactional(readOnly = true)
-    fun chargesByStatus(status: String?, cursor: Long?, limit: Int): com.lookation.dto.PagedDto<ChargeDto> {
+    fun chargesByStatus(status: String?, cursor: Long?, limit: Int): PagedDto<ChargeDto> {
         if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
         val filter = status?.let {
             try {
@@ -109,11 +112,11 @@ class WalletService(
             }
         }
         val rows = chargeRepository.listByStatus(filter, cursor, limit)
-        return com.lookation.dto.PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
+        return PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
     }
 
     @Transactional(readOnly = true)
-    fun withdrawalsByStatus(status: String?, cursor: Long?, limit: Int): com.lookation.dto.PagedDto<WithdrawalDto> {
+    fun withdrawalsByStatus(status: String?, cursor: Long?, limit: Int): PagedDto<WithdrawalDto> {
         if (limit !in 1..100) throw BadRequestException("limit은 1~100입니다")
         val filter = status?.let {
             try {
@@ -123,7 +126,7 @@ class WalletService(
             }
         }
         val rows = withdrawalRepository.listByStatus(filter, cursor, limit)
-        return com.lookation.dto.PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
+        return PagedDto(rows.map { it.toResponse() }, if (rows.size == limit) rows.last().id else null)
     }
 
     @Transactional(readOnly = true)
@@ -140,14 +143,14 @@ class WalletService(
     @Transactional(readOnly = true)
     fun pendingWithdrawalCount(): Long = withdrawalRepository.countByStatus(WithdrawalStatus.REQUESTED)
 
-    private fun com.lookation.repository.ChargeRow.toResponse() = ChargeDto(
+    private fun ChargeRow.toResponse() = ChargeDto(
         id = id,
         amount = amount,
         depositorName = depositorName,
         status = status,
     )
 
-    private fun com.lookation.repository.WithdrawalRow.toResponse() = WithdrawalDto(
+    private fun WithdrawalRow.toResponse() = WithdrawalDto(
         id = id,
         amount = amount,
         status = status,

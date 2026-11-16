@@ -194,32 +194,32 @@
       "overflow": false
     },
     {
-      "path": "/admin/notices/5",
+      "path": "/admin/notices/6",
       "slug": "notice-created",
       "status": "created"
     },
     {
-      "path": "/admin/notices/5",
+      "path": "/admin/notices/6",
       "slug": "notice-updated",
       "status": "updated"
     },
     {
-      "path": "/admin/notices/5",
+      "path": "/admin/notices/6",
       "slug": "notice-deleted",
       "status": "deleted"
     },
     {
-      "path": "/admin/helps/3",
+      "path": "/admin/helps/4",
       "slug": "help-created",
       "status": "created"
     },
     {
-      "path": "/admin/helps/3",
+      "path": "/admin/helps/4",
       "slug": "help-updated",
       "status": "updated"
     },
     {
-      "path": "/admin/helps/3",
+      "path": "/admin/helps/4",
       "slug": "help-deleted",
       "status": "deleted"
     }

@@ -4,11 +4,11 @@
 <body><section>
     <h1 class="h3 mb-4 text-gray-800">Q&amp;A관리</h1>
     <div class="card shadow"><div class="card-body"><table class="table table-bordered">
-        <thead><tr><th>ID</th><th>제목</th><th>상태</th><th></th></tr></thead>
+        <thead><tr><th>ID</th><th>제목</th><th>상태</th><th>일시</th><th></th></tr></thead>
         <tbody><tr th:each="q : ${page.items}">
-            <td th:text="${q.id}"></td><td th:text="${q.title}"></td><td th:text="${q.status}"></td>
+            <td th:text="${q.id}"></td><td th:text="${q.title}"></td><td th:text="${@fmt.qnaStatus(q.status)}"></td><td th:text="${@fmt.dateTime(q.createdAt)}"></td>
             <td><a class="btn btn-sm btn-primary" th:href="@{/admin/qnas/{id}(id=${q.id})}">상세</a></td>
-        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="4" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
+        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="5" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
         <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/qnas(cursor=${page.nextCursor})}">다음</a></div>
     </div></div>
 </section></body></html>

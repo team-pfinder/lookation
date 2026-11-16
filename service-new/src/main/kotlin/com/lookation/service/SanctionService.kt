@@ -2,6 +2,7 @@ package com.lookation.service
 
 import com.lookation.controller.form.ApplySanctionForm
 import com.lookation.dto.SanctionDto
+import com.lookation.global.error.BadRequestException
 import com.lookation.global.error.ConflictException
 import com.lookation.global.error.ForbiddenException
 import com.lookation.global.error.NotFoundException
@@ -26,15 +27,29 @@ class SanctionService(private val sanctionRepository: SanctionRepository) {
 
     @Transactional
     fun apply(adminId: Long, form: ApplySanctionForm): SanctionDto {
+        if (form.level !in 1..3) throw BadRequestException("제재 단계는 1~3입니다")
+        val now = OffsetDateTime.now()
+        val endsAt = form.endsAt ?: defaultEndsAt(form.level, now)
+        if (endsAt != null && !endsAt.isAfter(now)) {
+            throw BadRequestException("종료 일시는 현재 이후여야 합니다")
+        }
         val id = sanctionRepository.insert(
             accountId = form.accountId,
             reason = form.reason,
             level = form.level,
-            endsAt = form.endsAt,
+            endsAt = endsAt,
             adminId = adminId,
         )
         return requireNotNull(sanctionRepository.findById(id)).toResponse()
     }
+
+    /** 제재 단계별 기본 기간. 1차 7일, 2차 30일, 3차 영구. */
+    private fun defaultEndsAt(level: Int, now: OffsetDateTime): OffsetDateTime? =
+        when (level) {
+            1 -> now.plusDays(7)
+            2 -> now.plusDays(30)
+            else -> null
+        }
 
     @Transactional(readOnly = true)
     fun listByAccount(accountId: Long): List<SanctionDto> =

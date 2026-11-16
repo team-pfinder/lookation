@@ -97,7 +97,7 @@ node scripts/admin-smoke.mjs              # 앱이 떠 있는 상태에서 실�
 
 앱을 띄운 뒤 `http://localhost:8080/swagger-ui/index.html`에서 전체 API를 한국어 설명·요청/응답 예시와 함께 볼 수 있다. OpenAPI JSON은 `/v3/api-docs`다.
 
-1. `POST /api/v1/auth/login`을 실행해 `accessToken`을 복사한다(관리자 API용 토큰은 `/admin/login` 쿠키의 `access_token`을 쓴다. 시드 관리자는 `admin@lookation.local`).
+1. `POST /api/v1/auth/login`을 실행해 `accessToken`을 복사한다(관리자 API용 토큰은 `/admin/login` 응답 쿠키의 `admin_access_token`을 쓴다. 시드 관리자는 `admin@lookation.local`).
 2. 오른쪽 위 **Authorize**에 `accessToken`만 붙여넣는다(`Bearer ` 접두사 없이). 토큰은 새로고침해도 유지된다.
 3. 자물쇠가 닫힌 API는 토큰이 필요하고, 열린 API는 공개 엔드포인트다. 이 구분은 `global/config/OpenApiConfig.kt`의 목록과 `SecurityConfig`의 `permitAll` 매처를 맞춘 것이다.
 
@@ -170,12 +170,12 @@ jOOQ OSS 파서가 CHECK 제약을 읽지 못하므로 구조(V2)와 제약(V3)�
 | GET | `/api/v1/notices`, `/api/v1/helps` | 공개 |
 | POST/PUT/DELETE | `/api/v1/admin/notices`, `/api/v1/admin/helps` | ADMIN |
 | POST | `/api/v1/reports` | 인증 |
-| GET/POST | `/api/v1/admin/reports`, `/api/v1/admin/reports/{id}/decision` | ADMIN |
-| POST/DELETE | `/api/v1/admin/sanctions`, `/api/v1/admin/sanctions/{id}` | ADMIN |
+| GET/POST | `/api/v1/admin/reports?status=&targetType=`, `/api/v1/admin/reports/{id}/decision` | ADMIN (상태·대상 종류 필터) |
+| POST/DELETE | `/api/v1/admin/sanctions`, `/api/v1/admin/sanctions/{id}` | ADMIN (endsAt 생략 시 단계별 기본 기간) |
 
 ## 제재
 
-활성 제재가 있는 계정은 로그인·조회·예약 취소·출금은 가능하지만, 예약 생성·결제·리뷰·질문·신고·충전·출금 신청은 403으로 차단된다. 제재는 관리자 API로 부여·해제한다.
+활성 제재가 있는 계정은 로그인·조회·예약 취소·출금은 가능하지만, 예약 생성·결제·리뷰·질문·신고·충전·출금 신청은 403으로 차단된다. 제재는 관리자 API로 부여·해제한다. `endsAt`을 생략하면 1차는 7일, 2차는 30일, 3차는 영구 제재가 되며, 값을 주면 그 시각까지 적용된다. 명시한 종료 일시는 현재 이후여야 하고 과거면 400이다.
 
 ## 패키지
 

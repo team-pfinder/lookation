@@ -41,18 +41,20 @@ class ReportController(private val reportService: ReportService) {
 
     @Operation(
         summary = "신고 목록 조회 (관리자)",
-        description = "관리자가 전체 신고를 최신순(ID 내림차순)으로 조회합니다. `status`를 주면 해당 상태만 걸러내고, 생략하면 전체 상태를 반환합니다. `status`가 `RECEIVED`·`ACCEPTED`·`REJECTED`가 아니면 400이며, `limit`이 1~100을 벗어나도 400입니다. 응답의 `nextCursor`가 null이면 마지막 페이지입니다.",
+        description = "관리자가 전체 신고를 최신순(ID 내림차순)으로 조회합니다. `status`를 주면 해당 상태만, `targetType`을 주면 해당 대상 종류만 걸러내고, 생략하면 전체를 반환합니다. `status`가 `RECEIVED`·`ACCEPTED`·`REJECTED`가 아니거나 `targetType`이 `SPACE`·`RESERVATION`·`REVIEW`·`QNA`·`ACCOUNT`가 아니면 400이며, `limit`이 1~100을 벗어나도 400입니다. 응답의 `nextCursor`가 null이면 마지막 페이지입니다.",
     )
     @GetMapping("/admin/reports")
     @PreAuthorize("hasRole('ADMIN')")
     fun list(
         @Parameter(description = "신고 상태 필터: `RECEIVED`, `ACCEPTED`, `REJECTED`. 생략하면 전체", example = "RECEIVED")
         @RequestParam(required = false) status: String?,
+        @Parameter(description = "신고 대상 필터: `SPACE`, `RESERVATION`, `REVIEW`, `QNA`, `ACCOUNT`. 생략하면 전체", example = "SPACE")
+        @RequestParam(required = false) targetType: String?,
         @Parameter(description = "이전 페이지 마지막 신고 ID. 생략하면 첫 페이지", example = "42")
         @RequestParam(required = false) cursor: Long?,
         @Parameter(description = "페이지 크기 (1~100)", example = "20")
         @RequestParam(defaultValue = "20") limit: Int,
-    ): PagedDto<ReportDto> = reportService.list(status, cursor, limit)
+    ): PagedDto<ReportDto> = reportService.list(status, targetType, cursor, limit)
 
     @Operation(
         summary = "신고 심사",

@@ -28,7 +28,7 @@ Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/d
 | [`docs/spec/lookation/validation.md`](docs/spec/lookation/validation.md) | 요구사항 충돌·누락·질문 | 구현 전 결정 확인 |
 | [`docs/db/table-spec.md`](docs/db/table-spec.md) | 테이블 78개, 컬럼 294, DDL 기준 FK 78 | SQL·DTO를 만질 때 |
 | [`docs/security/dependency-scan-2026-11-06.md`](docs/security/dependency-scan-2026-11-06.md) | Kotlin 서버 의존성 CVE 스캔(0건), 스캔 한계, 재현 절차 | 의존성 버전·BOM을 바꿀 때 |
-| [`docs/adr/`](docs/adr/) (0001~0010) | 구조 결정 기록 | 설계를 바꿀 때 |
+| [`docs/adr/`](docs/adr/) (0001~0011) | 구조 결정 기록 | 설계를 바꿀 때 |
 
 ## 스택
 
@@ -54,7 +54,7 @@ Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/d
 
 ## 신규 백엔드 (service-new/)
 
-레거시 `service-old/`는 동결했고, 재작성은 `service-new/`에서 진행한다. 결정 근거는 `docs/adr/0001`~`0010`, 레거시→신규 대응표는 `docs/rewrite/parity-checklist.md`(184행)다.
+레거시 `service-old/`는 동결했고, 재작성은 `service-new/`에서 진행한다. 결정 근거는 `docs/adr/0001`~`0011`, 레거시→신규 대응표는 `docs/rewrite/parity-checklist.md`(184행)다.
 
 | 항목 | 값 |
 |---|---|

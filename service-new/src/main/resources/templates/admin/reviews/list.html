@@ -4,11 +4,13 @@
 <body><section>
     <h1 class="h3 mb-4 text-gray-800">리뷰관리</h1>
     <div class="card shadow"><div class="card-body"><table class="table table-bordered">
-        <thead><tr><th>ID</th><th>평점</th><th>내용</th><th></th></tr></thead>
+        <thead><tr><th>ID</th><th>평점</th><th>내용</th><th>공개 상태</th><th>블라인드 일시</th><th></th></tr></thead>
         <tbody><tr th:each="r : ${page.items}">
-            <td th:text="${r.id}"></td><td th:text="${r.rating}"></td><td th:text="${r.content}"></td>
+            <td th:text="${r.id}"></td><td th:text="${@fmt.rating(r.rating)}"></td><td th:text="${r.content}"></td>
+            <td><span class="badge" th:classappend="${r.blindedAt != null ? 'badge-secondary' : 'badge-success'}" th:text="${r.blindedAt != null ? '블라인드' : '공개'}"></span></td>
+            <td th:text="${@fmt.dateTime(r.blindedAt)}"></td>
             <td><a class="btn btn-sm btn-primary" th:href="@{/admin/reviews/{id}(id=${r.id})}">상세</a></td>
-        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="4" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
+        </tr><tr th:if="${page.items.isEmpty()}"><td colspan="6" class="text-center">조회 결과가 없습니다.</td></tr></tbody></table>
         <div th:if="${page.nextCursor != null}"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/reviews(cursor=${page.nextCursor})}">다음</a></div>
     </div></div>
 </section></body></html>

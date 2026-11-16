@@ -22,6 +22,6 @@ data class ApplySanctionForm(
     @field:NotBlank @field:Size(max = 300)
     val reason: String,
 
-    @field:Schema(description = "제재 종료 일시. 선택 항목이며 생략하면 기간 제한 없이 적용됩니다.", example = "2026-11-20T18:00:00+09:00")
+    @field:Schema(description = "제재 종료 일시. 선택 항목이며 생략하면 1차 7일, 2차 30일, 3차 영구가 적용됩니다. 명시하면 그 시각까지 적용되고 현재 이후여야 합니다.", example = "2026-11-20T18:00:00+09:00")
     val endsAt: OffsetDateTime? = null,
 )

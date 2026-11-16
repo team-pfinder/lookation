@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeParseException
 
 @Hidden
@@ -96,14 +95,10 @@ class AdminAccountViewController(
 
     private fun parseEndsAt(raw: String?): OffsetDateTime? {
         if (raw.isNullOrBlank()) return null
-        val parsed = try {
-            LocalDateTime.parse(raw).atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime()
+        return try {
+            LocalDateTime.parse(raw).atZone(KST).toOffsetDateTime()
         } catch (_: DateTimeParseException) {
             throw BadRequestException("종료 일시 형식이 올바르지 않습니다")
         }
-        if (!parsed.isAfter(OffsetDateTime.now())) {
-            throw BadRequestException("종료 일시는 현재 이후여야 합니다")
-        }
-        return parsed
     }
 }

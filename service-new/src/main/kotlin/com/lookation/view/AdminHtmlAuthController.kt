@@ -76,6 +76,10 @@ class AdminHtmlAuthController(
 
     private fun safeAdminNext(next: String?): String =
         next?.takeIf {
-            it.startsWith("/admin") && !it.startsWith("//") && !it.startsWith("/admin/login") && '\\' !in it
+            it.startsWith("/admin") &&
+                !it.startsWith("//") &&
+                !it.startsWith("/admin/login") &&
+                '\\' !in it &&
+                it.none { char -> char.code < 0x20 }
         } ?: "/admin"
 }

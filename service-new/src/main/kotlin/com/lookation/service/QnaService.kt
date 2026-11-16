@@ -95,7 +95,7 @@ class QnaService(
     @Transactional
     fun deleteByAdmin(qnaId: Long) {
         qnaRepository.findById(qnaId) ?: throw NotFoundException("질문을 찾을 수 없습니다")
-        if (qnaRepository.deleteAny(qnaId) != 1) throw NotFoundException("질문을 찾을 수 없습니다")
+        if (qnaRepository.deleteForAdmin(qnaId) != 1) throw NotFoundException("질문을 찾을 수 없습니다")
     }
 
     private fun response(qna: QnaRow): QnaDto = qna.toResponse()

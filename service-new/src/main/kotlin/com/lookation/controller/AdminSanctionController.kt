@@ -30,7 +30,7 @@ class AdminSanctionController(private val sanctionService: SanctionService) {
 
     @Operation(
         summary = "제재 부여",
-        description = "`accountId` 계정에 `level` 1~3, `reason` 필수로 제재를 추가합니다. `endsAt`을 생략하면 종료 시각이 없는 영구 제재가 되고, 값을 주면 그 시각까지 적용됩니다. 성공 시 200으로 생성된 제재를 반환하며 영구 제재의 `endsAt`은 null입니다. 값이 비었거나 범위를 벗어나면 400입니다.",
+        description = "`accountId` 계정에 `level` 1~3, `reason` 필수로 제재를 추가합니다. `endsAt`을 생략하면 단계별 기본 기간이 적용됩니다(1차 7일, 2차 30일, 3차 영구). 명시한 `endsAt`은 기본값보다 우선하며 현재 이후여야 합니다. 성공 시 200으로 생성된 제재를 반환하고 영구 제재의 `endsAt`은 null입니다. 값이 비었거나 범위를 벗어나거나 종료 일시가 과거면 400입니다.",
     )
     @PostMapping
     fun apply(

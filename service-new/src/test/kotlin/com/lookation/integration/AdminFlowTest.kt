@@ -1,6 +1,7 @@
 package com.lookation.integration
 
 import com.lookation.jooq.tables.Accounts.ACCOUNTS
+import com.lookation.jooq.tables.Sanctions.SANCTIONS
 import com.lookation.jooq.tables.Spaces.SPACES
 import com.lookation.jooq.tables.Withdrawals.WITHDRAWALS
 import com.lookation.repository.AdminUserRepository
@@ -88,6 +89,64 @@ class AdminFlowTest {
         assertThat(
             post("/api/v1/wallet/charges", mapOf("amount" to 10_000, "depositorName" to "홍길동"), member.access).status.value(),
         ).isEqualTo(HttpStatus.OK.value())
+    }
+
+    @Test
+    fun `sanction endsAt rejects past values and defaults by level`() {
+        val member = signup()
+        val adminToken = adminToken()
+
+        val pastReason = "과거 종료-${UUID.randomUUID()}"
+        val past = post(
+            "/api/v1/admin/sanctions",
+            mapOf(
+                "accountId" to member.id,
+                "level" to 1,
+                "reason" to pastReason,
+                "endsAt" to OffsetDateTime.now().minusDays(1).toString(),
+            ),
+            adminToken,
+        )
+        assertThat(past.status.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(dsl.fetchCount(SANCTIONS, SANCTIONS.REASON.eq(pastReason))).isZero()
+
+        val level1Reason = "1차 기본-${UUID.randomUUID()}"
+        val beforeLevel1 = OffsetDateTime.now()
+        val level1 = post(
+            "/api/v1/admin/sanctions",
+            mapOf("accountId" to member.id, "level" to 1, "reason" to level1Reason),
+            adminToken,
+        )
+        assertThat(level1.status.value()).isEqualTo(HttpStatus.OK.value())
+        val level1EndsAt = OffsetDateTime.parse(level1.body!!["endsAt"] as String)
+        assertThat(level1EndsAt).isBetween(
+            beforeLevel1.plusDays(7).minusMinutes(1),
+            OffsetDateTime.now().plusDays(7).plusMinutes(1),
+        )
+
+        val explicitReason = "명시 종료-${UUID.randomUUID()}"
+        val explicitEndsAt = OffsetDateTime.now().plusDays(10)
+        val explicit = post(
+            "/api/v1/admin/sanctions",
+            mapOf(
+                "accountId" to member.id,
+                "level" to 1,
+                "reason" to explicitReason,
+                "endsAt" to explicitEndsAt.toString(),
+            ),
+            adminToken,
+        )
+        assertThat(OffsetDateTime.parse(explicit.body!!["endsAt"] as String))
+            .isAfter(OffsetDateTime.now().plusDays(9))
+
+        val level3Reason = "3차 기본-${UUID.randomUUID()}"
+        val level3 = post(
+            "/api/v1/admin/sanctions",
+            mapOf("accountId" to member.id, "level" to 3, "reason" to level3Reason),
+            adminToken,
+        )
+        assertThat(level3.status.value()).isEqualTo(HttpStatus.OK.value())
+        assertThat(level3.body!!["endsAt"]).isNull()
     }
 
     @Test
@@ -195,6 +254,13 @@ class AdminFlowTest {
 
         val pending = get("/api/v1/admin/reports?status=RECEIVED", adminToken).body!!["items"] as List<*>
         assertThat(pending).hasSize(1)
+
+        val spaceReports = get("/api/v1/admin/reports?targetType=SPACE", adminToken).body!!["items"] as List<*>
+        assertThat(spaceReports.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).contains(reportId)
+        val reviewReports = get("/api/v1/admin/reports?targetType=REVIEW", adminToken).body!!["items"] as List<*>
+        assertThat(reviewReports.map { (it as Map<*, *>)["id"] as Number }.map { it.toLong() }).doesNotContain(reportId)
+        assertThat(get("/api/v1/admin/reports?targetType=UNKNOWN", adminToken).status.value())
+            .isEqualTo(HttpStatus.BAD_REQUEST.value())
 
         val decided = post("/api/v1/admin/reports/$reportId/decision", mapOf("accepted" to true), adminToken)
         assertThat(decided.body!!["status"]).isEqualTo("ACCEPTED")

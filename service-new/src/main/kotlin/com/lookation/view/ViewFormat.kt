@@ -1,8 +1,14 @@
 package com.lookation.view
 
+import com.lookation.domain.AccountStatus
+import com.lookation.domain.ChargeStatus
 import com.lookation.domain.FacilityCode
+import com.lookation.domain.QnaStatus
+import com.lookation.domain.ReportStatus
 import com.lookation.domain.ReservationStatus
+import com.lookation.domain.SpaceStatus
 import com.lookation.domain.SpaceType
+import com.lookation.domain.WithdrawalStatus
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalTime
@@ -41,6 +47,56 @@ class ViewFormat {
             "REFUNDED" -> "환불됨"
             "REJECTED" -> "거절됨"
             "EXPIRED" -> "만료됨"
+            else -> value ?: "-"
+        }
+
+    fun reportStatus(value: String?): String =
+        when (value) {
+            "RECEIVED" -> "접수"
+            "ACCEPTED" -> "인정"
+            "REJECTED" -> "기각"
+            else -> value ?: "-"
+        }
+
+    fun spaceStatus(value: String?): String =
+        when (value) {
+            "DRAFT" -> "작성 중"
+            "PENDING_INSPECTION" -> "검수 대기"
+            "INSPECTION_REJECTED" -> "검수 반려"
+            "PUBLISHED" -> "게시 중"
+            "SUSPENDED" -> "게시 중단"
+            "CLOSED" -> "종료"
+            else -> value ?: "-"
+        }
+
+    fun chargeStatus(value: String?): String =
+        when (value) {
+            "REQUESTED" -> "신청 대기"
+            "APPROVED" -> "승인"
+            "REJECTED" -> "거절"
+            else -> value ?: "-"
+        }
+
+    fun withdrawalStatus(value: String?): String =
+        when (value) {
+            "REQUESTED" -> "신청 대기"
+            "APPROVED" -> "승인"
+            "PAID" -> "지급 완료"
+            "REJECTED" -> "거절"
+            else -> value ?: "-"
+        }
+
+    fun qnaStatus(value: String?): String =
+        when (value) {
+            "OPEN" -> "답변 대기"
+            "ANSWERED" -> "답변 완료"
+            else -> value ?: "-"
+        }
+
+    fun accountStatus(value: String?): String =
+        when (value) {
+            "ACTIVE" -> "활동 중"
+            "WITHDRAWN" -> "탈퇴"
             else -> value ?: "-"
         }
 
@@ -83,6 +139,18 @@ class ViewFormat {
         }
 
     fun status(value: ReservationStatus?): String = status(value?.name)
+
+    fun reportStatus(value: ReportStatus?): String = reportStatus(value?.name)
+
+    fun spaceStatus(value: SpaceStatus?): String = spaceStatus(value?.name)
+
+    fun chargeStatus(value: ChargeStatus?): String = chargeStatus(value?.name)
+
+    fun withdrawalStatus(value: WithdrawalStatus?): String = withdrawalStatus(value?.name)
+
+    fun qnaStatus(value: QnaStatus?): String = qnaStatus(value?.name)
+
+    fun accountStatus(value: AccountStatus?): String = accountStatus(value?.name)
 
     fun spaceType(value: SpaceType?): String = spaceType(value?.name)
 

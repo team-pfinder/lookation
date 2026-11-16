@@ -6,9 +6,9 @@
     <div class="card shadow"><div class="card-body">
         <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
         <dl class="row"><dt class="col-sm-2">ID</dt><dd class="col-sm-10" th:text="${charge.id}"></dd>
-        <dt class="col-sm-2">금액</dt><dd class="col-sm-10" th:text="${charge.amount}"></dd>
+        <dt class="col-sm-2">금액</dt><dd class="col-sm-10" th:text="${@fmt.won(charge.amount)}"></dd>
         <dt class="col-sm-2">입금자명</dt><dd class="col-sm-10" th:text="${charge.depositorName}"></dd>
-        <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${charge.status}"></dd></dl>
+        <dt class="col-sm-2">상태</dt><dd class="col-sm-10" th:text="${@fmt.chargeStatus(charge.status)}"></dd></dl>
         <form class="d-inline" th:action="@{/admin/charges/{id}/decision(id=${charge.id})}" method="post" th:if="${charge.status.name() == 'REQUESTED'}">
             <input type="hidden" name="approved" value="true"><button class="btn btn-success" type="submit">승인</button></form>
         <form class="d-inline" th:action="@{/admin/charges/{id}/decision(id=${charge.id})}" method="post" th:if="${charge.status.name() == 'REQUESTED'}">

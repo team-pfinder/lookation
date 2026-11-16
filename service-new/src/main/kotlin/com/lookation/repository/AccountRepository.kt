@@ -90,15 +90,6 @@ class AccountRepository(private val dsl: DSLContext) {
             .fetch().map { it.toAccount() }
     }
 
-    fun countByRole(role: AccountRole?): Long =
-        if (role == null) dsl.fetchCount(ACCOUNTS).toLong()
-        else dsl.fetchCount(
-            ACCOUNTS,
-            ACCOUNTS.ID.`in`(
-                dsl.select(ACCOUNT_ROLES.ACCOUNT_ID).from(ACCOUNT_ROLES).where(ACCOUNT_ROLES.ROLE.eq(role.name)),
-            ),
-        ).toLong()
-
     private fun Record.toAccount(): Account = Account(
         id = get(ACCOUNTS.ID),
         email = get(ACCOUNTS.EMAIL),

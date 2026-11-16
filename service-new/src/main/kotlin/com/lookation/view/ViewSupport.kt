@@ -46,8 +46,7 @@ fun Jwt.accountIdOrNull(): Long? = subject?.toLongOrNull()
 fun Jwt.requireAccountId(): Long =
     accountIdOrNull() ?: throw UnauthorizedException("토큰 주체가 없습니다")
 
-fun Jwt.requireAdminId(): Long =
-    accountIdOrNull() ?: throw UnauthorizedException("토큰 주체가 없습니다")
+fun Jwt.requireAdminId(): Long = requireAccountId()
 
 /** 로그인 후 이동할 경로. 열린 리다이렉트를 막기 위해 사이트 내부 상대 경로만 허용한다. */
 fun safeNext(next: String?): String =
